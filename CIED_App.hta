@@ -1,9 +1,9 @@
 <html>
 <head>
-<title>CIEDs 患者管理システム</title>
+<title>CIEDs Patient Management System</title>
 <HTA:APPLICATION
     ID="CIEDApp"
-    APPLICATIONNAME="CIEDs患者管理システム"
+    APPLICATIONNAME="CIEDsSystem"
     BORDER="thick"
     BORDERSTYLE="normal"
     CAPTION="yes"
@@ -13,1065 +13,639 @@
     SHOWINTASKBAR="yes"
     SINGLEINSTANCE="yes"
     SYSMENU="yes"
-    VERSION="1.0"
+    VERSION="3.1"
     WINDOWSTATE="maximize"
+    NAVIGABLE="yes"
 />
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta charset="Shift_JIS">
 <style>
-/* ===== リセットと基本設定 ===== */
+/* Reset & Base */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { 
-    font-family: 'Segoe UI', 'Yu Gothic UI', 'Meiryo UI', sans-serif; 
-    background: #f8fafc; 
-    color: #1e293b; 
-    display: flex; 
+    font-family: 'Meiryo', 'Segoe UI', sans-serif; 
+    background-color: #f8fafc; 
+    color: #333; 
     height: 100vh; 
+    width: 100vw;
     overflow: hidden; 
 }
+button, input, select, textarea { font-family: inherit; }
 
-/* ===== カラーパレット（青系・黒系） ===== */
-:root {
-    --primary-blue: #2563eb;
-    --primary-blue-dark: #1d4ed8;
-    --primary-blue-light: #3b82f6;
-    --accent-blue: #0ea5e9;
-    --dark-navy: #0f172a;
-    --slate-900: #1e293b;
-    --slate-700: #334155;
-    --slate-600: #475569;
-    --slate-500: #64748b;
-    --slate-400: #94a3b8;
-    --slate-300: #cbd5e1;
-    --slate-200: #e2e8f0;
-    --slate-100: #f1f5f9;
-    --white: #ffffff;
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-}
-
-/* ===== ナビゲーションサイドバー ===== */
-.nav-sidebar {
-    width: 260px;
-    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-    padding: 20px 15px;
+/* Layout */
+#sidebar-panel {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 320px;
+    background-color: #1e293b;
+    border-right: 1px solid #475569;
+    z-index: 10;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #334155;
 }
-.nav-sidebar h2 { 
-    color: #f1f5f9; 
-    margin-bottom: 12px; 
-    font-size: 13px; 
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    text-transform: uppercase;
+#main-panel {
+    position: absolute;
+    top: 0; left: 320px; right: 0; bottom: 0;
+    background-color: #f8fafc;
+    display: flex;
+    flex-direction: column;
 }
-.search-box { 
-    width: 100%; 
-    padding: 10px 14px; 
-    border: 1px solid #475569; 
-    border-radius: 8px; 
-    background: rgba(255,255,255,0.05); 
-    color: #f1f5f9; 
-    font-size: 13px;
-    margin-bottom: 15px;
-    transition: all 0.2s;
-}
-.search-box:focus { 
-    outline: none; 
-    border-color: #3b82f6; 
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.2); 
-    background: rgba(255,255,255,0.08);
-}
-.search-box::placeholder { color: #94a3b8; }
 
-.patient-list { 
-    flex: 1; 
-    overflow-y: auto; 
-    background: rgba(0,0,0,0.2); 
-    border-radius: 8px; 
-    margin-bottom: 15px;
+/* Sidebar Elements */
+.sidebar-header {
+    height: 50px;
+    background-color: #0f172a;
+    display: flex;
 }
-.patient-item { 
-    padding: 12px 14px; 
-    border-bottom: 1px solid rgba(71,85,105,0.3); 
-    cursor: pointer; 
-    transition: all 0.15s; 
-}
-.patient-item:hover { background: rgba(59,130,246,0.15); }
-.patient-item.selected { 
-    background: rgba(59,130,246,0.25); 
-    border-left: 3px solid #3b82f6; 
-}
-.patient-item .name { 
-    font-weight: 600; 
-    color: #f1f5f9; 
+.sidebar-tab {
+    flex: 1;
+    background: transparent;
+    color: #94a3b8;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
     font-size: 14px;
-    margin-bottom: 3px;
-}
-.patient-item .karte { 
-    color: #94a3b8; 
-    font-size: 12px; 
-}
-
-.sidebar-actions { 
-    display: flex; 
-    flex-direction: column; 
-    gap: 10px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(71,85,105,0.4);
-}
-.btn { 
-    padding: 10px 16px; 
-    border-radius: 8px; 
-    border: none; 
-    cursor: pointer; 
-    font-weight: 600; 
-    font-size: 13px;
-    transition: all 0.2s; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    gap: 8px; 
-}
-.btn-primary { 
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); 
-    color: #fff; 
-    box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-}
-.btn-primary:hover { 
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
-    box-shadow: 0 4px 12px rgba(37,99,235,0.4);
-    transform: translateY(-1px);
-}
-.btn-secondary { 
-    background: rgba(255,255,255,0.08); 
-    color: #f1f5f9; 
-    border: 1px solid #475569; 
-}
-.btn-secondary:hover { 
-    background: rgba(59,130,246,0.15); 
-    border-color: #3b82f6;
-}
-
-/* ===== メインコンテンツエリア ===== */
-.main-content { 
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    overflow: hidden; 
-    background: #f8fafc;
-}
-.header { 
-    background: #ffffff; 
-    padding: 16px 24px; 
-    border-bottom: 1px solid #e2e8f0; 
-    display: flex; 
-    align-items: center; 
-    gap: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.header h1 { 
-    font-size: 18px; 
-    color: #0f172a; 
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.header h1 .icon { color: #2563eb; }
-
-/* ===== コンテンツ分割レイアウト ===== */
-.content-wrapper {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-    padding: 20px;
-    gap: 20px;
-}
-
-/* ===== 左カラム：患者基本情報 ===== */
-.left-column {
-    width: 380px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-}
-
-/* ===== 右カラム：3段カード ===== */
-.right-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    overflow-y: auto;
-}
-
-/* ===== カード共通スタイル ===== */
-.card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-    overflow: hidden;
+    border-bottom: 3px solid transparent;
     transition: all 0.2s;
 }
-.card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+.sidebar-tab:hover { background: rgba(255,255,255,0.05); }
+.sidebar-tab.active {
+    color: #fff;
+    background: #1e293b;
+    border-bottom: 3px solid #3b82f6;
 }
-.card-header {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    padding: 14px 18px;
+
+.sidebar-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: none;
+}
+.sidebar-content.active { display: block; }
+
+.search-box {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #334155;
+    border: 1px solid #475569;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.patient-list-item {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+.patient-list-item:hover { background-color: #334155; }
+.patient-list-item.selected { background-color: #2563eb; border-left: 4px solid #60a5fa; }
+.pt-name { font-weight: bold; font-size: 15px; color: #f1f5f9; }
+.pt-id { font-size: 12px; color: #94a3b8; }
+
+/* Detail View */
+.detail-table { width: 100%; }
+.detail-table td { border-bottom: 1px solid #334155; padding: 10px 0; }
+.detail-label { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
+.detail-value { font-size: 14px; color: #f1f5f9; font-weight: 500; }
+
+/* Main Panel Elements */
+.main-header {
+    height: 64px;
+    background: #fff;
     border-bottom: 1px solid #e2e8f0;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.card-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: #1e293b;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.card-title .icon {
-    color: #2563eb;
-    font-size: 16px;
-}
-.card-body {
-    padding: 16px 18px;
-}
-.card-actions {
-    display: flex;
-    gap: 8px;
-}
-.card-actions .btn-sm {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
-}
+.app-title { font-size: 18px; color: #0f172a; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+.loader { display:none; font-size:12px; color:#2563eb; margin-left:10px; font-weight:normal; }
+.current-patient-name { font-size: 18px; color: #2563eb; font-weight: bold; }
 
-/* ===== 患者基本情報カード ===== */
-.patient-info-card {
+.cards-area {
     flex: 1;
-}
-.patient-info-card .card-header {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    border-bottom: none;
-}
-.patient-info-card .card-title {
-    color: #f1f5f9;
-}
-.patient-info-card .card-title .icon {
-    color: #60a5fa;
-}
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-}
-.info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.info-item label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.info-item .value {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1e293b;
-    padding: 8px 12px;
-    background: #f8fafc;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-}
-.info-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-/* ===== 3段カード個別設定 ===== */
-.device-card .card-header { 
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); 
-    border-bottom-color: #bfdbfe;
-}
-.device-card .card-title .icon { color: #2563eb; }
-
-.settings-card .card-header { 
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); 
-    border-bottom-color: #bbf7d0;
-}
-.settings-card .card-title .icon { color: #16a34a; }
-
-.measurement-card .card-header { 
-    background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); 
-    border-bottom-color: #fde047;
-}
-.measurement-card .card-title .icon { color: #ca8a04; }
-
-/* ===== データテーブル ===== */
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-.data-table th, .data-table td {
-    padding: 10px 12px;
-    text-align: left;
-    border-bottom: 1px solid #f1f5f9;
-}
-.data-table th {
-    background: #f8fafc;
-    color: #64748b;
-    font-weight: 600;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-.data-table tr:hover {
-    background: #f8fafc;
-}
-.data-table tr:last-child td {
-    border-bottom: none;
-}
-
-/* ===== ステータスバッジ ===== */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-}
-.status-active {
-    background: #dcfce7;
-    color: #16a34a;
-}
-.status-old {
-    background: #f1f5f9;
-    color: #64748b;
-}
-
-/* ===== 空の状態表示 ===== */
-.empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: #94a3b8;
-}
-.empty-state .icon {
-    font-size: 40px;
-    margin-bottom: 12px;
-    opacity: 0.5;
-}
-.empty-state p {
-    font-size: 14px;
-}
-
-/* ===== モーダル ===== */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15,23,42,0.6);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-}
-.modal-overlay.active { display: flex; }
-.modal {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
-    padding: 24px;
-    max-width: 560px;
-    width: 90%;
-    max-height: 85vh;
+    padding: 20px;
     overflow-y: auto;
 }
-.modal h3 {
-    color: #0f172a;
-    font-size: 18px;
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #e2e8f0;
-}
-.form-group {
-    margin-bottom: 16px;
-}
-.form-group label {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    color: #475569;
-    margin-bottom: 6px;
-}
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 10px 14px;
+
+.card {
+    background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    font-size: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+.card-header {
+    padding: 12px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: bold;
     color: #1e293b;
-    background: #ffffff;
-    transition: all 0.2s;
-}
-.form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-}
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-}
-.form-actions {
     display: flex;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #e2e8f0;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
 }
-.form-actions .btn {
-    min-width: 100px;
-}
+.card-title { display: flex; align-items: center; gap: 8px; }
+.card-header.blue { border-left: 4px solid #3b82f6; background: linear-gradient(to right, #eff6ff, #fff); }
+.card-header.green { border-left: 4px solid #22c55e; background: linear-gradient(to right, #f0fdf4, #fff); }
+.card-header.yellow { border-left: 4px solid #eab308; background: linear-gradient(to right, #fefce8, #fff); }
 
-/* ===== アニメーション ===== */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.card { animation: fadeIn 0.3s ease-out; }
+.card-body { padding: 0; overflow-x: auto; }
+.empty-msg { padding: 30px; text-align: center; color: #94a3b8; }
+.empty-msg.error { color: #fef2f2; background: #b91c1c; border: 1px solid #991b1b; padding: 15px; border-radius: 4px; text-align: left; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
 
-/* ===== スクロールバー ===== */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+th { background: #f8fafc; color: #64748b; padding: 10px 15px; text-align: left; font-weight: 600; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+td { padding: 10px 15px; border-bottom: 1px solid #f1f5f9; color: #334155; white-space: nowrap; }
+tr:hover { background: #f8fafc; }
+.status-active { color: #16a34a; font-weight: bold; background: #dcfce7; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.status-old { color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+
+/* Forms & Modals */
+.btn { padding: 6px 14px; border-radius: 5px; cursor: pointer; border: none; font-size: 13px; font-weight: 500; transition: background 0.1s; }
+.btn-primary { background: #2563eb; color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-secondary { background: #fff; color: #475569; border: 1px solid #cbd5e1; }
+.btn-secondary:hover { background: #f1f5f9; border-color: #94a3b8; }
+.btn-block { width: 100%; display: block; margin-bottom: 10px; padding: 10px; }
+
+.modal-overlay {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15,23,42,0.7);
+    z-index: 100;
+    align-items: center; justify-content: center;
+}
+.modal-box {
+    background: #fff; width: 500px; max-width: 90%;
+    padding: 25px; border-radius: 12px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+}
+.modal-title { font-size: 18px; font-weight: bold; margin-bottom: 20px; color: #0f172a; }
+.form-group { margin-bottom: 15px; }
+.form-label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 5px; }
+.form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
 </style>
-</head>
-<body>
-<!-- ナビゲーションサイドバー -->
-<div class="nav-sidebar">
-    <h2>?? 患者検索</h2>
-    <input type="text" class="search-box" id="searchBox" placeholder="カルテ番号 / 氏名" onkeyup="searchPatients()">
-    <h2>?? 患者リスト</h2>
-    <div class="patient-list" id="patientList"></div>
-    <div class="sidebar-actions">
-        <button class="btn btn-primary" onclick="showNewPatientModal()">? 新規患者登録</button>
-        <button class="btn btn-secondary" onclick="importCSV()">?? CSV取込</button>
-    </div>
-</div>
-
-<!-- メインコンテンツ -->
-<div class="main-content">
-    <div class="header">
-        <h1><span class="icon">??</span> CIEDs 患者管理システム</h1>
-    </div>
-    
-    <div class="content-wrapper">
-        <!-- 左カラム：患者基本情報 -->
-        <div class="left-column">
-            <div class="card patient-info-card" id="patientInfoCard">
-                <div class="card-header">
-                    <div class="card-title"><span class="icon">??</span> 患者基本情報</div>
-                    <div class="card-actions">
-                        <button class="btn btn-secondary btn-sm" onclick="editPatient()">編集</button>
-                    </div>
-                </div>
-                <div class="card-body" id="patientInfoBody">
-                    <div class="empty-state">
-                        <div class="icon">??</div>
-                        <p>左のリストから患者を選択してください</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 右カラム：3段カード -->
-        <div class="right-column">
-            <!-- デバイス情報カード -->
-            <div class="card device-card">
-                <div class="card-header">
-                    <div class="card-title"><span class="icon">??</span> デバイス情報</div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm" onclick="showAddDeviceModal()">追加</button>
-                    </div>
-                </div>
-                <div class="card-body" id="deviceInfoBody">
-                    <div class="empty-state">
-                        <div class="icon">??</div>
-                        <p>デバイス情報がありません</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 設定情報カード -->
-            <div class="card settings-card">
-                <div class="card-header">
-                    <div class="card-title"><span class="icon">??</span> 設定情報</div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm" onclick="showAddSettingsModal()">追加</button>
-                    </div>
-                </div>
-                <div class="card-body" id="settingsInfoBody">
-                    <div class="empty-state">
-                        <div class="icon">??</div>
-                        <p>設定情報がありません</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 測定情報カード -->
-            <div class="card measurement-card">
-                <div class="card-header">
-                    <div class="card-title"><span class="icon">??</span> 測定情報</div>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-sm" onclick="showAddMeasurementModal()">追加</button>
-                    </div>
-                </div>
-                <div class="card-body" id="measurementInfoBody">
-                    <div class="empty-state">
-                        <div class="icon">??</div>
-                        <p>測定情報がありません</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- モーダルオーバーレイ -->
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal" id="modalContent"></div>
-</div>
-
-<script language="VBScript">
-Option Explicit
-Dim gAppPath, gDbPath, gLockPath, gConn, gCurrentPatientID
-Dim gFSO
-
-Sub Window_OnLoad()
-    Set gFSO = CreateObject("Scripting.FileSystemObject")
-    gAppPath = Replace(document.location.pathname, "/", "\")
-    If Left(gAppPath, 1) = "\" Then gAppPath = Mid(gAppPath, 2)
-    gAppPath = gFSO.GetParentFolderName(gAppPath)
-    gDbPath = gAppPath & "\CIED_DB.xlsx"
-    gLockPath = gAppPath & "\CIED_DB.lock"
-    gCurrentPatientID = ""
-    Call LoadPatientList()
-End Sub
-
-Function GetConnection()
-    On Error Resume Next
-    Set gConn = CreateObject("ADODB.Connection")
-    gConn.Open "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" & gDbPath & ";Extended Properties=""Excel 12.0 Xml;HDR=YES;IMEX=1"""
-    If Err.Number <> 0 Then
-        MsgBox "データベース接続エラー: " & Err.Description, vbCritical, "エラー"
-        Set GetConnection = Nothing
-        Exit Function
-    End If
-    Set GetConnection = gConn
-End Function
-
-Sub CloseConnection()
-    On Error Resume Next
-    If Not gConn Is Nothing Then
-        gConn.Close
-        Set gConn = Nothing
-    End If
-End Sub
-
-Function AcquireLock()
-    If gFSO.FileExists(gLockPath) Then
-        MsgBox "他のユーザーが編集中です。しばらく経ってから再度お試しください。", vbExclamation, "ロック中"
-        AcquireLock = False
-        Exit Function
-    End If
-    Dim f
-    Set f = gFSO.CreateTextFile(gLockPath, True)
-    f.Write Now()
-    f.Close
-    AcquireLock = True
-End Function
-
-Sub ReleaseLock()
-    On Error Resume Next
-    If gFSO.FileExists(gLockPath) Then gFSO.DeleteFile gLockPath
-End Sub
-
-Function GenerateID(prefix)
-    GenerateID = prefix & Year(Now) & Right("0" & Month(Now), 2) & Right("0" & Day(Now), 2) & Right("0" & Hour(Now), 2) & Right("0" & Minute(Now), 2) & Right("0" & Second(Now), 2) & Int(Rnd * 100)
-End Function
-
-Function SafeStr(val)
-    If IsNull(val) Then
-        SafeStr = ""
-    Else
-        SafeStr = CStr(val)
-    End If
-End Function
-
-Function SafeDate(val)
-    On Error Resume Next
-    If IsNull(val) Or val = "" Then
-        SafeDate = ""
-    ElseIf IsDate(val) Then
-        SafeDate = FormatDateTime(CDate(val), 2)
-    Else
-        SafeDate = CStr(val)
-    End If
-End Function
-
-Sub LoadPatientList()
-    Dim conn, rs, html
-    Set conn = GetConnection()
-    If conn Is Nothing Then Exit Sub
-    
-    Set rs = CreateObject("ADODB.Recordset")
-    On Error Resume Next
-    rs.Open "SELECT PatientID, カルテ番号, 氏名 FROM [T_Patients$] ORDER BY カルテ番号", conn, 3, 1
-    If Err.Number <> 0 Then
-        CloseConnection
-        Exit Sub
-    End If
-    On Error GoTo 0
-    
-    html = ""
-    Do While Not rs.EOF
-        html = html & "<div class='patient-item' onclick=""selectPatient('" & rs("PatientID") & "')"">"
-        html = html & "<div class='name'>" & SafeStr(rs("氏名")) & "</div>"
-        html = html & "<div class='karte'>" & SafeStr(rs("カルテ番号")) & "</div>"
-        html = html & "</div>"
-        rs.MoveNext
-    Loop
-    rs.Close
-    CloseConnection
-    
-    If html = "" Then html = "<div class='empty-state'><div class='icon'>??</div><p>患者データがありません</p></div>"
-    document.getElementById("patientList").innerHTML = html
-End Sub
-
-Sub SelectPatient(pid)
-    gCurrentPatientID = pid
-    Dim items, i
-    Set items = document.getElementsByClassName("patient-item")
-    For i = 0 To items.length - 1
-        items(i).className = "patient-item"
-    Next
-    Call LoadPatientInfo()
-    Call LoadDeviceInfo()
-    Call LoadSettingsInfo()
-    Call LoadMeasurementInfo()
-End Sub
-
-Sub LoadPatientInfo()
-    Dim rs, html, conn
-    If gCurrentPatientID = "" Then
-        document.getElementById("patientInfoBody").innerHTML = "<div class='empty-state'><div class='icon'>??</div><p>左のリストから患者を選択してください</p></div>"
-        Exit Sub
-    End If
-    
-    Set conn = GetConnection()
-    If conn Is Nothing Then Exit Sub
-    
-    Set rs = CreateObject("ADODB.Recordset")
-    rs.Open "SELECT * FROM [T_Patients$] WHERE PatientID='" & gCurrentPatientID & "'", conn, 3, 1
-    
-    If Not rs.EOF Then
-        html = "<div class='info-grid'>"
-        html = html & "<div class='info-item'><label>氏名</label><div class='value'>" & SafeStr(rs("氏名")) & "</div></div>"
-        html = html & "<div class='info-row'>"
-        html = html & "<div class='info-item'><label>カルテ番号</label><div class='value'>" & SafeStr(rs("カルテ番号")) & "</div></div>"
-        html = html & "<div class='info-item'><label>生年月日</label><div class='value'>" & SafeDate(rs("生年月日")) & "</div></div>"
-        html = html & "</div>"
-        html = html & "<div class='info-row'>"
-        html = html & "<div class='info-item'><label>性別</label><div class='value'>" & SafeStr(rs("性別")) & "</div></div>"
-        html = html & "<div class='info-item'><label>基礎疾患</label><div class='value'>" & SafeStr(rs("基礎疾患")) & "</div></div>"
-        html = html & "</div>"
-        html = html & "<div class='info-item'><label>住所</label><div class='value'>" & SafeStr(rs("住所")) & "</div></div>"
-        html = html & "<div class='info-item'><label>電話番号</label><div class='value'>" & SafeStr(rs("電話番号")) & "</div></div>"
-        html = html & "</div>"
-    Else
-        html = "<div class='empty-state'><div class='icon'>?</div><p>患者情報が見つかりません</p></div>"
-    End If
-    rs.Close
-    CloseConnection
-    
-    document.getElementById("patientInfoBody").innerHTML = html
-End Sub
-
-Sub LoadDeviceInfo()
-    Dim rs, html, conn
-    If gCurrentPatientID = "" Then
-        document.getElementById("deviceInfoBody").innerHTML = "<div class='empty-state'><div class='icon'>??</div><p>デバイス情報がありません</p></div>"
-        Exit Sub
-    End If
-    
-    Set conn = GetConnection()
-    If conn Is Nothing Then Exit Sub
-    
-    Set rs = CreateObject("ADODB.Recordset")
-    rs.Open "SELECT * FROM [T_DeviceConfig$] WHERE PatientID='" & gCurrentPatientID & "' ORDER BY 導入日 DESC", conn, 3, 1
-    
-    If Not rs.EOF Then
-        html = "<table class='data-table'>"
-        html = html & "<tr><th>導入日</th><th>メーカー</th><th>機種名</th><th>シリアル</th><th>ステータス</th></tr>"
-        Do While Not rs.EOF
-            html = html & "<tr>"
-            html = html & "<td>" & SafeDate(rs("導入日")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("メーカー")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("機種名")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("シリアル番号")) & "</td>"
-            If SafeStr(rs("ステータス")) = "Active" Then
-                html = html & "<td><span class='status-badge status-active'>Active</span></td>"
-            Else
-                html = html & "<td><span class='status-badge status-old'>Old</span></td>"
-            End If
-            html = html & "</tr>"
-            rs.MoveNext
-        Loop
-        html = html & "</table>"
-    Else
-        html = "<div class='empty-state'><div class='icon'>??</div><p>デバイス情報がありません</p></div>"
-    End If
-    rs.Close
-    CloseConnection
-    
-    document.getElementById("deviceInfoBody").innerHTML = html
-End Sub
-
-Sub LoadSettingsInfo()
-    Dim rs, html, conn
-    If gCurrentPatientID = "" Then
-        document.getElementById("settingsInfoBody").innerHTML = "<div class='empty-state'><div class='icon'>??</div><p>設定情報がありません</p></div>"
-        Exit Sub
-    End If
-    
-    Set conn = GetConnection()
-    If conn Is Nothing Then Exit Sub
-    
-    Set rs = CreateObject("ADODB.Recordset")
-    rs.Open "SELECT * FROM [T_Settings$] WHERE PatientID='" & gCurrentPatientID & "' ORDER BY 設定日 DESC", conn, 3, 1
-    
-    If Not rs.EOF Then
-        html = "<table class='data-table'>"
-        html = html & "<tr><th>設定日</th><th>モード</th><th>LowRate</th><th>UpRate</th><th>AV Delay</th></tr>"
-        Do While Not rs.EOF
-            html = html & "<tr>"
-            html = html & "<td>" & SafeDate(rs("設定日")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("モード")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("LowRate")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("UpRate")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("AVDelay")) & "</td>"
-            html = html & "</tr>"
-            rs.MoveNext
-        Loop
-        html = html & "</table>"
-    Else
-        html = "<div class='empty-state'><div class='icon'>??</div><p>設定情報がありません</p></div>"
-    End If
-    rs.Close
-    CloseConnection
-    
-    document.getElementById("settingsInfoBody").innerHTML = html
-End Sub
-
-Sub LoadMeasurementInfo()
-    Dim rs, html, conn
-    If gCurrentPatientID = "" Then
-        document.getElementById("measurementInfoBody").innerHTML = "<div class='empty-state'><div class='icon'>??</div><p>測定情報がありません</p></div>"
-        Exit Sub
-    End If
-    
-    Set conn = GetConnection()
-    If conn Is Nothing Then Exit Sub
-    
-    Set rs = CreateObject("ADODB.Recordset")
-    rs.Open "SELECT * FROM [T_Measurements$] WHERE PatientID='" & gCurrentPatientID & "' ORDER BY 測定日 DESC", conn, 3, 1
-    
-    If Not rs.EOF Then
-        html = "<table class='data-table'>"
-        html = html & "<tr><th>測定日</th><th>P波高(mV)</th><th>R波高(mV)</th><th>Aインピ(Ω)</th><th>Vインピ(Ω)</th></tr>"
-        Do While Not rs.EOF
-            html = html & "<tr>"
-            html = html & "<td>" & SafeDate(rs("測定日")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("P波高")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("R波高")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("Aインピーダンス")) & "</td>"
-            html = html & "<td>" & SafeStr(rs("Vインピーダンス")) & "</td>"
-            html = html & "</tr>"
-            rs.MoveNext
-        Loop
-        html = html & "</table>"
-    Else
-        html = "<div class='empty-state'><div class='icon'>??</div><p>測定情報がありません</p></div>"
-    End If
-    rs.Close
-    CloseConnection
-    
-    document.getElementById("measurementInfoBody").innerHTML = html
-End Sub
-
-Sub showNewPatientModal()
-    Dim html
-    html = "<h3>新規患者登録</h3>" & _
-        "<div class='form-row'><div class='form-group'><label>カルテ番号</label><input type='text' id='ptKarte'></div>" & _
-        "<div class='form-group'><label>氏名</label><input type='text' id='ptName'></div></div>" & _
-        "<div class='form-row'><div class='form-group'><label>生年月日</label><input type='date' id='ptBirth'></div>" & _
-        "<div class='form-group'><label>性別</label><select id='ptSex'><option value='男'>男</option><option value='女'>女</option></select></div></div>" & _
-        "<div class='form-group'><label>基礎疾患</label><input type='text' id='ptDisease'></div>" & _
-        "<div class='form-group'><label>住所</label><input type='text' id='ptAddress'></div>" & _
-        "<div class='form-group'><label>電話番号</label><input type='text' id='ptPhone'></div>" & _
-        "<div class='form-actions'><button class='btn btn-secondary' onclick='closeModal()'>キャンセル</button>" & _
-        "<button class='btn btn-primary' onclick='saveNewPatient()'>登録</button></div>"
-    Call showModal(html)
-End Sub
-
-Sub showModal(content)
-    document.getElementById("modalContent").innerHTML = content
-    document.getElementById("modalOverlay").className = "modal-overlay active"
-End Sub
-
-Sub closeModal()
-    document.getElementById("modalOverlay").className = "modal-overlay"
-End Sub
-
-Sub SavePatientData(karte, name, birth, sex, disease, address, phone)
-    If Not AcquireLock() Then Exit Sub
-    
-    Dim conn, pid
-    Set conn = GetConnection()
-    If conn Is Nothing Then ReleaseLock: Exit Sub
-    
-    pid = GenerateID("P")
-    On Error Resume Next
-    conn.Execute "INSERT INTO [T_Patients$] VALUES ('" & pid & "','" & karte & "','" & name & "','" & birth & "','" & sex & "','" & disease & "','" & address & "','" & phone & "')"
-    If Err.Number <> 0 Then
-        MsgBox "保存エラー: " & Err.Description, vbCritical
-    Else
-        MsgBox "患者情報を登録しました。", vbInformation
-    End If
-    CloseConnection
-    ReleaseLock
-    closeModal
-    LoadPatientList
-End Sub
-
-Sub SaveDeviceData(devdate, maker, model, serial, lead, status)
-    If gCurrentPatientID = "" Then MsgBox "患者を選択してください。", vbExclamation: Exit Sub
-    If Not AcquireLock() Then Exit Sub
-    
-    Dim conn, did
-    Set conn = GetConnection()
-    If conn Is Nothing Then ReleaseLock: Exit Sub
-    
-    did = GenerateID("D")
-    On Error Resume Next
-    conn.Execute "INSERT INTO [T_DeviceConfig$] VALUES ('" & did & "','" & gCurrentPatientID & "','" & devdate & "','" & maker & "','" & model & "','" & serial & "','" & lead & "','" & status & "')"
-    If Err.Number <> 0 Then
-        MsgBox "保存エラー: " & Err.Description, vbCritical
-    Else
-        MsgBox "デバイス情報を登録しました。", vbInformation
-    End If
-    CloseConnection
-    ReleaseLock
-    closeModal
-    LoadDeviceInfo
-End Sub
-
-Sub SaveSettingsData(sdate, smode, lowrate, uprate, avdelay)
-    If gCurrentPatientID = "" Then MsgBox "患者を選択してください。", vbExclamation: Exit Sub
-    If Not AcquireLock() Then Exit Sub
-    
-    Dim conn, sid
-    Set conn = GetConnection()
-    If conn Is Nothing Then ReleaseLock: Exit Sub
-    
-    sid = GenerateID("S")
-    On Error Resume Next
-    conn.Execute "INSERT INTO [T_Settings$] VALUES ('" & sid & "','" & gCurrentPatientID & "','" & sdate & "','" & smode & "','" & lowrate & "','" & uprate & "','" & avdelay & "')"
-    If Err.Number <> 0 Then
-        MsgBox "保存エラー: " & Err.Description, vbCritical
-    Else
-        MsgBox "設定情報を登録しました。", vbInformation
-    End If
-    CloseConnection
-    ReleaseLock
-    closeModal
-    LoadSettingsInfo
-End Sub
-
-Sub SaveMeasurementData(mdate, pwave, rwave, aimp, vimp)
-    If gCurrentPatientID = "" Then MsgBox "患者を選択してください。", vbExclamation: Exit Sub
-    If Not AcquireLock() Then Exit Sub
-    
-    Dim conn, mid
-    Set conn = GetConnection()
-    If conn Is Nothing Then ReleaseLock: Exit Sub
-    
-    mid = GenerateID("M")
-    On Error Resume Next
-    conn.Execute "INSERT INTO [T_Measurements$] VALUES ('" & mid & "','" & gCurrentPatientID & "','" & mdate & "','" & pwave & "','" & rwave & "','" & aimp & "','" & vimp & "')"
-    If Err.Number <> 0 Then
-        MsgBox "保存エラー: " & Err.Description, vbCritical
-    Else
-        MsgBox "測定情報を登録しました。", vbInformation
-    End If
-    CloseConnection
-    ReleaseLock
-    closeModal
-    LoadMeasurementInfo
-End Sub
-
-Sub EditPatient()
-    MsgBox "編集機能は現在開発中です。", vbInformation, "お知らせ"
-End Sub
-
-Sub importCSV()
-    MsgBox "CSV取込機能は現在開発中です。", vbInformation, "お知らせ"
-End Sub
-</script>
 
 <script language="JavaScript">
-function searchPatients() {
-    var filter = document.getElementById('searchBox').value.toLowerCase();
-    var items = document.getElementsByClassName('patient-item');
-    for (var i = 0; i < items.length; i++) {
-        var text = items[i].innerText.toLowerCase();
-        items[i].style.display = text.indexOf(filter) > -1 ? '' : 'none';
+// Global Data
+var gDbPath = "";
+var gLockPath = "";
+var gCurrentPID = "";
+var gPatients = [];
+var gDevices = [];
+var gSettings = [];
+var gMeasurements = [];
+
+var MAX_RETRIES = 5;
+var RETRY_DELAY_MS = 1000;
+
+// Initialize
+window.onload = function() {
+    try {
+        setTimeout(function() {
+            window.moveTo(0, 0);
+            window.resizeTo(screen.availWidth, screen.availHeight);
+        }, 100);
+
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var path = document.location.pathname;
+        path = path.replace(/\//g, "\\");
+        if (path.substring(0, 1) == "\\") path = path.substring(1); 
+        gDbPath = fso.GetParentFolderName(path) + "\\CIED_DB.xlsx";
+        gLockPath = fso.GetParentFolderName(path) + "\\CIED_DB.lock";
+        
+        if (!fso.FileExists(gDbPath)) {
+            document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>ファイルが見つかりません:<br>" + gDbPath + "</div>";
+            return;
+        }
+
+        loadAllData();
+        
+    } catch(e) {
+        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>起動エラー:<br>" + e.message + "</div>";
+    }
+};
+
+function setStatus(msg) {
+    document.getElementById("status-msg").innerText = msg;
+    var ind = document.getElementById("loading-indicator");
+    if(msg.indexOf("...") > -1) {
+        ind.style.display = "inline";
+        ind.innerText = msg;
+    } else {
+        ind.style.display = "none";
     }
 }
 
-function selectPatient(pid) {
-    window.execScript("Call SelectPatient('" + pid + "')", "VBScript");
-    var items = document.getElementsByClassName('patient-item');
-    for (var i = 0; i < items.length; i++) {
-        items[i].className = 'patient-item';
-        if (items[i].onclick.toString().indexOf(pid) > -1) {
-            items[i].className = 'patient-item selected';
+// --- Excel Automation (Read) ---
+function loadAllData() {
+    setStatus("データ同期中...");
+    
+    var excel = null;
+    var book = null;
+    try {
+        excel = new ActiveXObject("Excel.Application");
+        excel.Visible = false;
+        excel.DisplayAlerts = false;
+        
+        // ReadOnly=True で開く（共有ロックを回避）
+        book = excel.Workbooks.Open(gDbPath, 0, true); 
+        
+        gPatients = readSheetData(book.Sheets("T_Patients"));
+        gDevices = readSheetData(book.Sheets("T_DeviceConfig"));
+        gSettings = readSheetData(book.Sheets("T_Settings"));
+        gMeasurements = readSheetData(book.Sheets("T_Measurements"));
+        
+        book.Close(false);
+        excel.Quit();
+        excel = null;
+        
+        renderPatientList();
+        
+    } catch(e) {
+        if(book) { try{book.Close(false);}catch(e2){} }
+        if(excel) { try{excel.Quit();}catch(e2){} }
+        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>読み込みエラー:<br>" + e.message + "</div>";
+        setStatus("");
+    }
+}
+
+function readSheetData(sheet) {
+    var data = [];
+    try {
+        var usedRange = sheet.UsedRange;
+        var rowCount = usedRange.Rows.Count;
+        var colCount = usedRange.Columns.Count;
+        
+        if (rowCount <= 1) return [];
+        
+        // VBArrayをJScript配列に変換（これは Column-Major = 列優先 になる）
+        // Index = (ColIndex - 1) * RowCount + (RowIndex - 1)
+        var vArray = new VBArray(usedRange.Value).toArray();
+        
+        // ヘッダー行 (Row 1) の取得
+        var headers = [];
+        for(var c=1; c<=colCount; c++) {
+            var idx = (c - 1) * rowCount;
+            headers.push(vArray[idx]); 
         }
+        
+        // データ行 (Row 2 .. RowCount) の取得
+        for(var r=2; r<=rowCount; r++) {
+            var rowObj = {};
+            var hasData = false;
+            for(var c=1; c<=colCount; c++) {
+                var idx = (c - 1) * rowCount + (r - 1);
+                var val = vArray[idx];
+                var key = headers[c-1];
+                
+                if (val !== undefined && val !== null) {
+                    rowObj[key] = formatDate(val);
+                    if (val !== "") hasData = true;
+                } else {
+                    rowObj[key] = "";
+                }
+            }
+            if(hasData) data.push(rowObj);
+        }
+        
+    } catch(e) { /* Ignore sheet errors */ }
+    return data;
+}
+
+function formatDate(val) {
+    try {
+        // Excel日付シリアルの判定と変換は複雑なので、Dateオブジェクトなら変換
+        var d = new Date(val);
+        if(!isNaN(d) && d.getFullYear() > 1900) {
+             var y = d.getFullYear();
+             var m = d.getMonth() + 1;
+             var dd = d.getDate();
+             return y + "/" + (m<10?"0"+m:m) + "/" + (dd<10?"0"+dd:dd);
+        }
+    } catch(e){}
+    return val + "";
+}
+
+// --- Logic ---
+
+function showTab(mode) {
+    document.getElementById('btn-list').className = 'sidebar-tab' + (mode=='list'?' active':'');
+    document.getElementById('btn-info').className = 'sidebar-tab' + (mode=='info'?' active':'');
+    document.getElementById('tab-list').className = 'sidebar-content' + (mode=='list'?' active':'');
+    document.getElementById('tab-info').className = 'sidebar-content' + (mode=='info'?' active':'');
+    
+    // Refresh list if returning
+    if(mode == 'list') filterList();
+}
+
+function renderPatientList() {
+    var container = document.getElementById("patient-list-container");
+    var html = "";
+    var count = 0;
+    
+    for(var i=0; i<gPatients.length; i++) {
+        var p = gPatients[i];
+        if(!p["氏名"]) continue;
+        
+        html += "<div class='patient-list-item' pid='" + p["PatientID"] + "' onclick='selectPatient(\"" + p["PatientID"] + "\")'>";
+        html += "<div class='pt-name'>" + p["氏名"] + "</div>";
+        html += "<div class='pt-id'>" + p["カルテ番号"] + "</div>";
+        html += "</div>";
+        count++;
+    }
+    
+    if (count === 0) html = "<div class='empty-msg'>データなし</div>";
+    
+    container.innerHTML = html;
+    setStatus(count + " 件");
+    filterList();
+}
+
+function selectPatient(pid) {
+    gCurrentPID = pid;
+    
+    var items = document.getElementsByClassName("patient-list-item");
+    for(var i=0; i<items.length; i++) {
+        items[i].className = "patient-list-item";
+        if(items[i].getAttribute("pid") == pid) items[i].className += " selected";
+    }
+    
+    var p = null;
+    for(var i=0; i<gPatients.length; i++) {
+        if(gPatients[i]["PatientID"] == pid) { p = gPatients[i]; break; }
+    }
+    
+    if (p) {
+        var html = "<div style='text-align:center; padding:20px 0;'>";
+        html += "<div style='font-size:48px; margin-bottom:10px;'></div>";
+        html += "<div style='font-size:18px; font-weight:bold; color:#fff;'>" + p["氏名"] + "</div>";
+        html += "</div>";
+        
+        html += "<table class='detail-table'>";
+        html += "<tr><td><span class='detail-label'>カルテ番号</span><span class='detail-value'>" + p["カルテ番号"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>生年月日</span><span class='detail-value'>" + p["生年月日"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>性別</span><span class='detail-value'>" + p["性別"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>電話番号</span><span class='detail-value'>" + p["電話番号"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>原疾患</span><span class='detail-value'>" + p["原疾患"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>住所</span><span class='detail-value'>" + p["住所"] + "</span></td></tr>";
+        html += "</table>";
+        
+        document.getElementById("patient-detail-container").innerHTML = html;
+        document.getElementById("current-patient-name").innerText = p["氏名"] + " 様";
+        
+        renderSubData(gDevices, "PatientID", pid, "device-body", ["手術日", "本体メーカー", "本体型番", "本体Serial", "ステータス"]);
+        renderSubData(gSettings, "PatientID", pid, "settings-body", ["設定日", "Mode", "LowerRate", "UpperRate", "AV_Delay"]);
+        renderSubData(gMeasurements, "PatientID", pid, "measurement-body", ["計測日", "Sensing_A", "Sensing_V", "Impedance_A", "Impedance_RV"]);
+        
+        showTab('info');
+    }
+}
+
+function renderSubData(sourceArray, keyField, keyVal, targetId, headers) {
+    var html = "<div class='empty-msg'>履歴なし</div>";
+    var rows = [];
+    
+    for(var i=0; i<sourceArray.length; i++) {
+        if(sourceArray[i][keyField] == keyVal) {
+            rows.push(sourceArray[i]);
+        }
+    }
+    rows.sort(function(a,b){ return (a[headers[0]] < b[headers[0]]) ? 1 : -1; });
+    
+    if(rows.length > 0) {
+        html = "<table><tr>";
+        for(var h=0; h<headers.length; h++) html += "<th>"+headers[h]+"</th>";
+        html += "</tr>";
+        
+        for(var i=0; i<rows.length; i++) {
+            html += "<tr>";
+            for(var h=0; h<headers.length; h++) {
+                var val = rows[i][headers[h]];
+                if(headers[h]=="ステータス") {
+                    if(val=="Active") val = "<span class='status-active'>Active</span>";
+                    else val = "<span class='status-old'>Old</span>";
+                }
+                html += "<td>" + val + "</td>";
+            }
+            html += "</tr>";
+        }
+        html += "</table>";
+    }
+    document.getElementById(targetId).innerHTML = html;
+}
+
+function filterList() {
+    var key = document.getElementById('search-box').value.toLowerCase();
+    var items = document.getElementsByClassName("patient-list-item");
+    for(var i=0; i<items.length; i++) {
+        var text = items[i].innerText.toLowerCase();
+        items[i].style.display = (text.indexOf(key) > -1) ? 'block' : 'none';
+    }
+}
+
+// --- Lock & Save (Concurrency Control) ---
+function generateID(prefix) {
+    var d = new Date();
+    return prefix + d.getFullYear() + (d.getMonth()+1) + d.getDate() + d.getHours() + d.getMinutes() + d.getSeconds();
+}
+
+function acquireLock() {
+    var fso = new ActiveXObject("Scripting.FileSystemObject");
+    // Check if lock exists
+    if (fso.FileExists(gLockPath)) return false;
+    try {
+        var f = fso.CreateTextFile(gLockPath, false); // Fail if exists
+        f.WriteLine(new Date());
+        f.Close();
+        return true;
+    } catch(e) {
+        return false;
+    }
+}
+
+function releaseLock() {
+    var fso = new ActiveXObject("Scripting.FileSystemObject");
+    if(fso.FileExists(gLockPath)) {
+        try { fso.DeleteFile(gLockPath, true); } catch(e){}
+    }
+}
+
+function savePatient() {
+    setStatus("保存準備中...");
+    
+    // Lock Retry Loop with setTimeout is hard in synchronous flow.
+    // We try once, if locked, user must retry. Or simple loop.
+    
+    if (!acquireLock()) {
+        alert("他のユーザーが編集中です。数秒待ってから再度「登録」を押してください。");
+        setStatus("");
+        return;
+    }
+    
+    var excel = null;
+    var book = null;
+    
+    try {
+        setStatus("Excelへ書き込み中...");
+        
+        var k = document.getElementById('np_karte').value;
+        var n = document.getElementById('np_name').value;
+        var b = document.getElementById('np_birth').value;
+        var s = document.getElementById('np_sex').value;
+        var d = document.getElementById('np_dis').value;
+        var a = document.getElementById('np_addr').value;
+        var p = document.getElementById('np_tel').value;
+        var id = generateID("P");
+        
+        excel = new ActiveXObject("Excel.Application");
+        excel.Visible = false;
+        excel.DisplayAlerts = false;
+        
+        // Open Read/Write
+        book = excel.Workbooks.Open(gDbPath);
+        var sheet = book.Sheets("T_Patients");
+        var lastRow = sheet.UsedRange.Rows.Count + 1;
+        
+        sheet.Cells(lastRow, 1).Value = id;
+        sheet.Cells(lastRow, 2).Value = k;
+        sheet.Cells(lastRow, 3).Value = n;
+        sheet.Cells(lastRow, 4).Value = b;
+        sheet.Cells(lastRow, 5).Value = s;
+        sheet.Cells(lastRow, 6).Value = d;
+        sheet.Cells(lastRow, 7).Value = a;
+        sheet.Cells(lastRow, 8).Value = p;
+        
+        book.Save();
+        book.Close();
+        excel.Quit();
+        excel = null;
+        
+        closeModal();
+        releaseLock();
+        
+        alert("登録完了しました。");
+        loadAllData(); // Reload
+        
+    } catch(e) {
+        if(book) { try{book.Close(false);}catch(e2){} }
+        if(excel) { try{excel.Quit();}catch(e2){} }
+        releaseLock(); // Make sure to release
+        alert("保存エラー: " + e.message);
+        setStatus("");
     }
 }
 
 function showNewPatientModal() {
-    window.execScript("Call showNewPatientModal()", "VBScript");
+    var modal = document.getElementById("modal-overlay");
+    var content = document.getElementById("modal-content");
+    var html = "<div class='modal-title'>新規患者登録</div>";
+    
+    html += "<div class='form-group'><label class='form-label'>カルテ番号</label><input class='form-input' id='np_karte'></div>";
+    html += "<div class='form-group'><label class='form-label'>氏名</label><input class='form-input' id='np_name'></div>";
+    html += "<div class='form-group'><label class='form-label'>生年月日</label><input class='form-input' type='date' id='np_birth'></div>";
+    html += "<div class='form-group'><label class='form-label'>性別</label><select class='form-input' id='np_sex'><option>男</option><option>女</option></select></div>";
+    html += "<div class='form-group'><label class='form-label'>原疾患</label><input class='form-input' id='np_dis'></div>";
+    html += "<div class='form-group'><label class='form-label'>住所</label><input class='form-input' id='np_addr'></div>";
+    html += "<div class='form-group'><label class='form-label'>電話番号</label><input class='form-input' id='np_tel'></div>";
+    
+    html += "<div style='text-align:right; margin-top:20px;'>";
+    html += "<button class='btn btn-secondary' onclick='closeModal()'>キャンセル</button> ";
+    html += "<button class='btn btn-primary' onclick='savePatient()'>登録保存</button>";
+    html += "</div>";
+    
+    content.innerHTML = html;
+    modal.style.display = "flex";
 }
+function closeModal() { document.getElementById("modal-overlay").style.display = "none"; }
+function showDeviceModal() { alert("未実装"); }
+function showSettingsModal() { alert("未実装"); }
+function showMeasurementModal() { alert("未実装"); }
 
-function closeModal() {
-    window.execScript("Call closeModal()", "VBScript");
-}
-
-function saveNewPatient() {
-    var karte = document.getElementById('ptKarte').value;
-    var name = document.getElementById('ptName').value;
-    var birth = document.getElementById('ptBirth').value;
-    var sex = document.getElementById('ptSex').value;
-    var disease = document.getElementById('ptDisease').value;
-    var address = document.getElementById('ptAddress').value;
-    var phone = document.getElementById('ptPhone').value;
-    window.execScript("Call SavePatientData('" + karte + "','" + name + "','" + birth + "','" + sex + "','" + disease + "','" + address + "','" + phone + "')", "VBScript");
-}
-
-function editPatient() {
-    window.execScript("Call EditPatient()", "VBScript");
-}
-
-function showAddDeviceModal() {
-    var html = '<h3>デバイス情報追加</h3>' +
-        '<div class="form-row"><div class="form-group"><label>導入日</label><input type="date" id="devDate"></div>' +
-        '<div class="form-group"><label>メーカー</label><input type="text" id="devMaker" placeholder="例: Medtronic"></div></div>' +
-        '<div class="form-row"><div class="form-group"><label>機種名</label><input type="text" id="devModel"></div>' +
-        '<div class="form-group"><label>シリアル番号</label><input type="text" id="devSerial"></div></div>' +
-        '<div class="form-row"><div class="form-group"><label>リード構成</label><input type="text" id="devLead" placeholder="例: RA+RV"></div>' +
-        '<div class="form-group"><label>ステータス</label><select id="devStatus"><option value="Active">Active</option><option value="Old">Old</option></select></div></div>' +
-        '<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>' +
-        '<button class="btn btn-primary" onclick="saveDevice()">登録</button></div>';
-    showModal(html);
-}
-
-function saveDevice() {
-    var date = document.getElementById('devDate').value;
-    var maker = document.getElementById('devMaker').value;
-    var model = document.getElementById('devModel').value;
-    var serial = document.getElementById('devSerial').value;
-    var lead = document.getElementById('devLead').value;
-    var status = document.getElementById('devStatus').value;
-    window.execScript("Call SaveDeviceData('" + date + "','" + maker + "','" + model + "','" + serial + "','" + lead + "','" + status + "')", "VBScript");
-}
-
-function showAddSettingsModal() {
-    var html = '<h3>設定情報追加</h3>' +
-        '<div class="form-row"><div class="form-group"><label>設定日</label><input type="date" id="setDate"></div>' +
-        '<div class="form-group"><label>モード</label><input type="text" id="setMode" placeholder="例: DDD"></div></div>' +
-        '<div class="form-row"><div class="form-group"><label>LowRate</label><input type="text" id="setLowRate" placeholder="例: 60"></div>' +
-        '<div class="form-group"><label>UpRate</label><input type="text" id="setUpRate" placeholder="例: 130"></div></div>' +
-        '<div class="form-group"><label>AV Delay</label><input type="text" id="setAVDelay" placeholder="例: 180ms"></div>' +
-        '<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>' +
-        '<button class="btn btn-primary" onclick="saveSettings()">登録</button></div>';
-    showModal(html);
-}
-
-function saveSettings() {
-    var sdate = document.getElementById('setDate').value;
-    var smode = document.getElementById('setMode').value;
-    var lowrate = document.getElementById('setLowRate').value;
-    var uprate = document.getElementById('setUpRate').value;
-    var avdelay = document.getElementById('setAVDelay').value;
-    window.execScript("Call SaveSettingsData('" + sdate + "','" + smode + "','" + lowrate + "','" + uprate + "','" + avdelay + "')", "VBScript");
-}
-
-function showAddMeasurementModal() {
-    var html = '<h3>測定情報追加</h3>' +
-        '<div class="form-group"><label>測定日</label><input type="date" id="mesDate"></div>' +
-        '<div class="form-row"><div class="form-group"><label>P波高 (mV)</label><input type="text" id="mesPwave" placeholder="例: 2.5"></div>' +
-        '<div class="form-group"><label>R波高 (mV)</label><input type="text" id="mesRwave" placeholder="例: 12.0"></div></div>' +
-        '<div class="form-row"><div class="form-group"><label>Aインピーダンス (Ω)</label><input type="text" id="mesAimp" placeholder="例: 450"></div>' +
-        '<div class="form-group"><label>Vインピーダンス (Ω)</label><input type="text" id="mesVimp" placeholder="例: 550"></div></div>' +
-        '<div class="form-actions"><button class="btn btn-secondary" onclick="closeModal()">キャンセル</button>' +
-        '<button class="btn btn-primary" onclick="saveMeasurement()">登録</button></div>';
-    showModal(html);
-}
-
-function saveMeasurement() {
-    var mdate = document.getElementById('mesDate').value;
-    var pwave = document.getElementById('mesPwave').value;
-    var rwave = document.getElementById('mesRwave').value;
-    var aimp = document.getElementById('mesAimp').value;
-    var vimp = document.getElementById('mesVimp').value;
-    window.execScript("Call SaveMeasurementData('" + mdate + "','" + pwave + "','" + rwave + "','" + aimp + "','" + vimp + "')", "VBScript");
-}
-
-function showModal(html) {
-    document.getElementById('modalContent').innerHTML = html;
-    document.getElementById('modalOverlay').className = 'modal-overlay active';
-}
-
-function importCSV() {
-    window.execScript("Call importCSV()", "VBScript");
-}
 </script>
+</head>
+<body>
+
+<div id="sidebar-panel">
+    <div class="sidebar-header">
+        <button id="btn-list" class="sidebar-tab active" onclick="showTab('list')">リスト</button>
+        <button id="btn-info" class="sidebar-tab" onclick="showTab('info')">基本情報</button>
+    </div>
+    
+    <div id="tab-list" class="sidebar-content active">
+        <input type="text" class="search-box" id="search-box" onkeyup="filterList()" placeholder="検索: カルテNo / 氏名">
+        <div id="status-msg" style="color:#fcd34d; font-size:12px; margin-bottom:5px;">Loading...</div>
+        <div id="patient-list-container"></div>
+        
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #334155;">
+            <button class="btn btn-primary btn-block" onclick="showNewPatientModal()">＋ 新規患者登録</button>
+            <button class="btn btn-secondary btn-block" style="background:#334155; color:#ccc; border:1px solid #475569;" onclick="alert('CSV取込')"> CSV取込</button>
+        </div>
+    </div>
+    
+    <div id="tab-info" class="sidebar-content">
+        <div id="patient-detail-container">
+            <div style="text-align:center; padding-top:60px; color:#94a3b8;">
+                <p>リストから<br>患者を選択してください</p>
+                <br>
+                <button class="btn btn-secondary" style="background:#334155; color:#fff;" onclick="showTab('list')">リストに戻る</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="main-panel">
+    <div class="main-header">
+        <div class="app-title"> CIEDs 患者管理システム <span id="loading-indicator" class="loader">通信中...</span></div>
+        <div id="current-patient-name" class="current-patient-name"></div>
+    </div>
+    
+    <div class="cards-area">
+        <!-- Device -->
+        <div class="card">
+            <div class="card-header blue">
+                <div class="card-title"> デバイス情報</div>
+                <button class="btn btn-secondary" onclick="showDeviceModal()">追加</button>
+            </div>
+            <div class="card-body" id="device-body">
+                <div class="empty-msg">データなし</div>
+            </div>
+        </div>
+        
+        <!-- Settings -->
+        <div class="card">
+            <div class="card-header green">
+                <div class="card-title"> 設定情報</div>
+                <button class="btn btn-secondary" onclick="showSettingsModal()">追加</button>
+            </div>
+            <div class="card-body" id="settings-body">
+                <div class="empty-msg">データなし</div>
+            </div>
+        </div>
+        
+        <!-- Measurements -->
+        <div class="card">
+            <div class="card-header yellow">
+                <div class="card-title"> 測定情報</div>
+                <button class="btn btn-secondary" onclick="showMeasurementModal()">追加</button>
+            </div>
+            <div class="card-body" id="measurement-body">
+                <div class="empty-msg">データなし</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay">
+    <div id="modal-content" class="modal-box"></div>
+</div>
+
 </body>
 </html>
-

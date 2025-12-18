@@ -2,8 +2,8 @@
 ' CIEDs Database Initialization Script
 ' CreateDatabase.vbs
 ' ============================================
-' ‚±‚ÌƒXƒNƒŠƒvƒg‚ÍCIED_DB.xlsx‚ğ‰Šú¶¬‚µ‚Ü‚·B
-' Às•û–@: ƒ_ƒuƒ‹ƒNƒŠƒbƒN ‚Ü‚½‚Í cscript CreateDatabase.vbs
+' ã“ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆã¯CIED_DB.xlsxã‚’åˆæœŸç”Ÿæˆã—ã¾ã™ã€‚
+' å®Ÿè¡Œæ–¹æ³•: ãƒ€ãƒ–ãƒ«ã‚¯ãƒªãƒƒã‚¯ ã¾ãŸã¯ cscript CreateDatabase.vbs
 ' ============================================
 
 Option Explicit
@@ -13,26 +13,26 @@ Dim strPath, strDbPath
 Dim arrSheets, arrHeaders
 Dim i, j
 
-' ƒXƒNƒŠƒvƒg‚Ì‚ ‚éƒtƒHƒ‹ƒ_‚ğæ“¾
+' ã‚¹ã‚¯ãƒªãƒ—ãƒˆã®ã‚ã‚‹ãƒ•ã‚©ãƒ«ãƒ€ã‚’å–å¾—
 strPath = Replace(WScript.ScriptFullName, WScript.ScriptName, "")
 strDbPath = strPath & "CIED_DB.xlsx"
 
-' Šù‘¶ƒtƒ@ƒCƒ‹‚ÌŠm”F
+' æ—¢å­˜ãƒ•ã‚¡ã‚¤ãƒ«ã®ç¢ºèª
 Dim objFSO
 Set objFSO = CreateObject("Scripting.FileSystemObject")
 If objFSO.FileExists(strDbPath) Then
-    If MsgBox("CIED_DB.xlsx ‚ÍŠù‚É‘¶İ‚µ‚Ü‚·Bã‘‚«‚µ‚Ü‚·‚©H", vbYesNo + vbQuestion, "Šm”F") = vbNo Then
-        WScript.Echo "ˆ—‚ğ’†~‚µ‚Ü‚µ‚½B"
+    If MsgBox("CIED_DB.xlsx ã¯æ—¢ã«å­˜åœ¨ã—ã¾ã™ã€‚ä¸Šæ›¸ãã—ã¾ã™ã‹ï¼Ÿ", vbYesNo + vbQuestion, "ç¢ºèª") = vbNo Then
+        WScript.Echo "å‡¦ç†ã‚’ä¸­æ­¢ã—ã¾ã—ãŸã€‚"
         WScript.Quit
     End If
     objFSO.DeleteFile strDbPath, True
 End If
 
-' ExcelƒAƒvƒŠƒP[ƒVƒ‡ƒ“‹N“®
+' Excelã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³èµ·å‹•
 On Error Resume Next
 Set objExcel = CreateObject("Excel.Application")
 If Err.Number <> 0 Then
-    MsgBox "Excel‚ğ‹N“®‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B" & vbCrLf & "Microsoft Excel‚ªƒCƒ“ƒXƒg[ƒ‹‚³‚ê‚Ä‚¢‚é‚©Šm”F‚µ‚Ä‚­‚¾‚³‚¢B", vbCritical, "ƒGƒ‰["
+    MsgBox "Excelã‚’èµ·å‹•ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚" & vbCrLf & "Microsoft ExcelãŒã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«ã•ã‚Œã¦ã„ã‚‹ã‹ç¢ºèªã—ã¦ãã ã•ã„ã€‚", vbCritical, "ã‚¨ãƒ©ãƒ¼"
     WScript.Quit
 End If
 On Error GoTo 0
@@ -40,41 +40,41 @@ On Error GoTo 0
 objExcel.Visible = False
 objExcel.DisplayAlerts = False
 
-' V‹Kƒ[ƒNƒuƒbƒNì¬
+' æ–°è¦ãƒ¯ãƒ¼ã‚¯ãƒ–ãƒƒã‚¯ä½œæˆ
 Set objWorkbook = objExcel.Workbooks.Add
 
-' ƒV[ƒg’è‹`
+' ã‚·ãƒ¼ãƒˆå®šç¾©
 arrSheets = Array("T_Patients", "T_DeviceConfig", "T_Settings", "T_Measurements", "T_Documents")
 
-' ŠeƒV[ƒg‚Ìƒwƒbƒ_[’è‹`
+' å„ã‚·ãƒ¼ãƒˆã®ãƒ˜ãƒƒãƒ€ãƒ¼å®šç¾©
 Dim headersPatients, headersDeviceConfig, headersSettings, headersMeasurements, headersDocuments
 
-headersPatients = Array("PatientID", "ƒJƒ‹ƒe”Ô†", "–¼", "¶”NŒ“ú", "«•Ê", "Œ´¾Š³", "ZŠ", "“d˜b”Ô†")
+headersPatients = Array("PatientID", "ã‚«ãƒ«ãƒ†ç•ªå·", "æ°å", "ç”Ÿå¹´æœˆæ—¥", "æ€§åˆ¥", "åŸç–¾æ‚£", "ä½æ‰€", "é›»è©±ç•ªå·")
 
-headersDeviceConfig = Array("ConfigID", "PatientID", "èp“ú", "–{‘Ìƒ[ƒJ[", "–{‘ÌŒ^”Ô", "–{‘ÌSerial", "ƒŠ[ƒh\¬", "ƒXƒe[ƒ^ƒX")
+headersDeviceConfig = Array("ConfigID", "PatientID", "æ‰‹è¡“æ—¥", "æœ¬ä½“ãƒ¡ãƒ¼ã‚«ãƒ¼", "æœ¬ä½“å‹ç•ª", "æœ¬ä½“Serial", "ãƒªãƒ¼ãƒ‰æ§‹æˆ", "ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹")
 
-headersSettings = Array("SettingID", "PatientID", "İ’è“ú", "Mode", "LowerRate", "UpperRate", "Output_A", "Output_V", "Sensitivity_A", "Sensitivity_V", "AV_Delay", "ZoneSettings", "Details")
+headersSettings = Array("SettingID", "PatientID", "è¨­å®šæ—¥", "Mode", "LowerRate", "UpperRate", "Output_A", "Output_V", "Sensitivity_A", "Sensitivity_V", "AV_Delay", "ZoneSettings", "Details")
 
-headersMeasurements = Array("MeasureID", "PatientID", "Œv‘ª“ú", "‹æ•ª", "Battery", "Impedance_A", "Impedance_RV", "Impedance_LV", "Threshold_A", "Threshold_RV", "Threshold_LV", "Sensing_A", "Sensing_V", "Burden_ATAF", "Burden_VT")
+headersMeasurements = Array("MeasureID", "PatientID", "è¨ˆæ¸¬æ—¥", "åŒºåˆ†", "Battery", "Impedance_A", "Impedance_RV", "Impedance_LV", "Threshold_A", "Threshold_RV", "Threshold_LV", "Sensing_A", "Sensing_V", "Burden_ATAF", "Burden_VT")
 
-headersDocuments = Array("DocID", "PatientID", "“o˜^“ú", "ƒJƒeƒSƒŠ", "FilePath")
+headersDocuments = Array("DocID", "PatientID", "ç™»éŒ²æ—¥", "ã‚«ãƒ†ã‚´ãƒª", "FilePath")
 
-' •K—v‚ÈƒV[ƒg”‚ğŠm•Û
+' å¿…è¦ãªã‚·ãƒ¼ãƒˆæ•°ã‚’ç¢ºä¿
 Do While objWorkbook.Sheets.Count < UBound(arrSheets) + 1
     objWorkbook.Sheets.Add , objWorkbook.Sheets(objWorkbook.Sheets.Count)
 Loop
 
-' •s—v‚ÈƒV[ƒg‚ğíœi3–‡‚ªƒfƒtƒHƒ‹ƒg‚Åì¬‚³‚ê‚éê‡j
+' ä¸è¦ãªã‚·ãƒ¼ãƒˆã‚’å‰Šé™¤ï¼ˆ3æšãŒãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§ä½œæˆã•ã‚Œã‚‹å ´åˆï¼‰
 Do While objWorkbook.Sheets.Count > UBound(arrSheets) + 1
     objWorkbook.Sheets(objWorkbook.Sheets.Count).Delete
 Loop
 
-' ŠeƒV[ƒg‚Ìİ’è
+' å„ã‚·ãƒ¼ãƒˆã®è¨­å®š
 For i = 0 To UBound(arrSheets)
     Set objSheet = objWorkbook.Sheets(i + 1)
     objSheet.Name = arrSheets(i)
     
-    ' ƒwƒbƒ_[İ’è
+    ' ãƒ˜ãƒƒãƒ€ãƒ¼è¨­å®š
     Select Case arrSheets(i)
         Case "T_Patients"
             For j = 0 To UBound(headersPatients)
@@ -98,40 +98,40 @@ For i = 0 To UBound(arrSheets)
             Next
     End Select
     
-    ' ƒwƒbƒ_[s‚Ì‘®İ’è
+    ' ãƒ˜ãƒƒãƒ€ãƒ¼è¡Œã®æ›¸å¼è¨­å®š
     objSheet.Rows(1).Font.Bold = True
     objSheet.Rows(1).Interior.Color = RGB(70, 130, 180) ' SteelBlue
     objSheet.Rows(1).Font.Color = RGB(255, 255, 255)    ' White
     
-    ' —ñ•‚Ì©“®’²®
+    ' åˆ—å¹…ã®è‡ªå‹•èª¿æ•´
     objSheet.Columns.AutoFit
 Next
 
-' ƒTƒ“ƒvƒ‹ƒf[ƒ^‚Ì‘}“üi“®ìŠm”F—pj
+' ã‚µãƒ³ãƒ—ãƒ«ãƒ‡ãƒ¼ã‚¿ã®æŒ¿å…¥ï¼ˆå‹•ä½œç¢ºèªç”¨ï¼‰
 Set objSheet = objWorkbook.Sheets("T_Patients")
 objSheet.Cells(2, 1).Value = "P0001"           ' PatientID
-objSheet.Cells(2, 2).Value = "12345678"        ' ƒJƒ‹ƒe”Ô†
-objSheet.Cells(2, 3).Value = "R“c ‘¾˜Y"       ' –¼
-objSheet.Cells(2, 4).Value = "1950/01/15"      ' ¶”NŒ“ú
-objSheet.Cells(2, 5).Value = "’j"              ' «•Ê
-objSheet.Cells(2, 6).Value = "Š®‘S–[ºƒuƒƒbƒN" ' Œ´¾Š³
-objSheet.Cells(2, 7).Value = "“Œ‹“sç‘ã“c‹æ1-1-1" ' ZŠ
-objSheet.Cells(2, 8).Value = "03-1234-5678"    ' “d˜b”Ô†
+objSheet.Cells(2, 2).Value = "12345678"        ' ã‚«ãƒ«ãƒ†ç•ªå·
+objSheet.Cells(2, 3).Value = "å±±ç”° å¤ªéƒ"       ' æ°å
+objSheet.Cells(2, 4).Value = "1950/01/15"      ' ç”Ÿå¹´æœˆæ—¥
+objSheet.Cells(2, 5).Value = "ç”·"              ' æ€§åˆ¥
+objSheet.Cells(2, 6).Value = "å®Œå…¨æˆ¿å®¤ãƒ–ãƒ­ãƒƒã‚¯" ' åŸç–¾æ‚£
+objSheet.Cells(2, 7).Value = "æ±äº¬éƒ½åƒä»£ç”°åŒº1-1-1" ' ä½æ‰€
+objSheet.Cells(2, 8).Value = "03-1234-5678"    ' é›»è©±ç•ªå·
 
 Set objSheet = objWorkbook.Sheets("T_DeviceConfig")
 objSheet.Cells(2, 1).Value = "C0001"           ' ConfigID
 objSheet.Cells(2, 2).Value = "P0001"           ' PatientID
-objSheet.Cells(2, 3).Value = "2020/05/15"      ' èp“ú
-objSheet.Cells(2, 4).Value = "Medtronic"       ' –{‘Ìƒ[ƒJ[
-objSheet.Cells(2, 5).Value = "Azure XT DR MRI" ' –{‘ÌŒ^”Ô
-objSheet.Cells(2, 6).Value = "ABC123456"       ' –{‘ÌSerial
-objSheet.Cells(2, 7).Value = "RA-RV"           ' ƒŠ[ƒh\¬
-objSheet.Cells(2, 8).Value = "Active"          ' ƒXƒe[ƒ^ƒX
+objSheet.Cells(2, 3).Value = "2020/05/15"      ' æ‰‹è¡“æ—¥
+objSheet.Cells(2, 4).Value = "Medtronic"       ' æœ¬ä½“ãƒ¡ãƒ¼ã‚«ãƒ¼
+objSheet.Cells(2, 5).Value = "Azure XT DR MRI" ' æœ¬ä½“å‹ç•ª
+objSheet.Cells(2, 6).Value = "ABC123456"       ' æœ¬ä½“Serial
+objSheet.Cells(2, 7).Value = "RA-RV"           ' ãƒªãƒ¼ãƒ‰æ§‹æˆ
+objSheet.Cells(2, 8).Value = "Active"          ' ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹
 
 Set objSheet = objWorkbook.Sheets("T_Settings")
 objSheet.Cells(2, 1).Value = "S0001"           ' SettingID
 objSheet.Cells(2, 2).Value = "P0001"           ' PatientID
-objSheet.Cells(2, 3).Value = "2020/05/15"      ' İ’è“ú
+objSheet.Cells(2, 3).Value = "2020/05/15"      ' è¨­å®šæ—¥
 objSheet.Cells(2, 4).Value = "DDDR"            ' Mode
 objSheet.Cells(2, 5).Value = 60                ' LowerRate
 objSheet.Cells(2, 6).Value = 130               ' UpperRate
@@ -146,8 +146,8 @@ objSheet.Cells(2, 13).Value = ""               ' Details
 Set objSheet = objWorkbook.Sheets("T_Measurements")
 objSheet.Cells(2, 1).Value = "M0001"           ' MeasureID
 objSheet.Cells(2, 2).Value = "P0001"           ' PatientID
-objSheet.Cells(2, 3).Value = "2024/01/10"      ' Œv‘ª“ú
-objSheet.Cells(2, 4).Value = "ŠO—ˆ"            ' ‹æ•ª
+objSheet.Cells(2, 3).Value = "2024/01/10"      ' è¨ˆæ¸¬æ—¥
+objSheet.Cells(2, 4).Value = "å¤–æ¥"            ' åŒºåˆ†
 objSheet.Cells(2, 5).Value = "3.0V"            ' Battery
 objSheet.Cells(2, 6).Value = 450               ' Impedance_A
 objSheet.Cells(2, 7).Value = 520               ' Impedance_RV
@@ -160,10 +160,10 @@ objSheet.Cells(2, 13).Value = "8.0mV"          ' Sensing_V
 objSheet.Cells(2, 14).Value = "0%"             ' Burden_ATAF
 objSheet.Cells(2, 15).Value = "0%"             ' Burden_VT
 
-' ƒtƒ@ƒCƒ‹•Û‘¶
+' ãƒ•ã‚¡ã‚¤ãƒ«ä¿å­˜
 objWorkbook.SaveAs strDbPath, 51  ' 51 = xlOpenXMLWorkbook (.xlsx)
 
-' ƒNƒŠ[ƒ“ƒAƒbƒv
+' ã‚¯ãƒªãƒ¼ãƒ³ã‚¢ãƒƒãƒ—
 objWorkbook.Close False
 objExcel.Quit
 
@@ -172,8 +172,8 @@ Set objWorkbook = Nothing
 Set objExcel = Nothing
 Set objFSO = Nothing
 
-MsgBox "CIED_DB.xlsx ‚ğ³í‚Éì¬‚µ‚Ü‚µ‚½B" & vbCrLf & vbCrLf & _
-       "êŠ: " & strDbPath & vbCrLf & vbCrLf & _
-       "ƒTƒ“ƒvƒ‹ƒf[ƒ^iR“c‘¾˜Yj‚ª“o˜^‚³‚ê‚Ä‚¢‚Ü‚·B", vbInformation, "Š®—¹"
+MsgBox "CIED_DB.xlsx ã‚’æ­£å¸¸ã«ä½œæˆã—ã¾ã—ãŸã€‚" & vbCrLf & vbCrLf & _
+       "å ´æ‰€: " & strDbPath & vbCrLf & vbCrLf & _
+       "ã‚µãƒ³ãƒ—ãƒ«ãƒ‡ãƒ¼ã‚¿ï¼ˆå±±ç”°å¤ªéƒï¼‰ãŒç™»éŒ²ã•ã‚Œã¦ã„ã¾ã™ã€‚", vbInformation, "å®Œäº†"
 
 WScript.Quit

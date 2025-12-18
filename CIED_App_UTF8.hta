@@ -1,4 +1,4 @@
-<html>
+ï»¿<html>
 <head>
 <title>CIEDs Patient Management System</title>
 <HTA:APPLICATION
@@ -13,7 +13,7 @@
     SHOWINTASKBAR="yes"
     SINGLEINSTANCE="yes"
     SYSMENU="yes"
-    VERSION="3.2"
+    VERSION="3.1"
     WINDOWSTATE="maximize"
     NAVIGABLE="yes"
 />
@@ -221,14 +221,14 @@ window.onload = function() {
         gLockPath = fso.GetParentFolderName(path) + "\\CIED_DB.lock";
         
         if (!fso.FileExists(gDbPath)) {
-            document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ:<br>" + gDbPath + "</div>";
+            document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>ãƒ•ã‚¡ã‚¤ãƒ«ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“:<br>" + gDbPath + "</div>";
             return;
         }
 
         loadAllData();
         
     } catch(e) {
-        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>‹N“®ƒGƒ‰[:<br>" + e.message + "</div>";
+        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>èµ·å‹•ã‚¨ãƒ©ãƒ¼:<br>" + e.message + "</div>";
     }
 };
 
@@ -237,6 +237,7 @@ function setStatus(msg) {
     var ind = document.getElementById("loading-indicator");
     if(msg.indexOf("...") > -1) {
         ind.style.display = "inline";
+        ind.innerText = msg;
     } else {
         ind.style.display = "none";
     }
@@ -244,7 +245,7 @@ function setStatus(msg) {
 
 // --- Excel Automation (Read) ---
 function loadAllData() {
-    setStatus("ƒf[ƒ^“¯Šú’†...");
+    setStatus("ãƒ‡ãƒ¼ã‚¿åŒæœŸä¸­...");
     
     var excel = null;
     var book = null;
@@ -253,6 +254,7 @@ function loadAllData() {
         excel.Visible = false;
         excel.DisplayAlerts = false;
         
+        // ReadOnly=True ã§é–‹ãï¼ˆå…±æœ‰ãƒ­ãƒƒã‚¯ã‚’å›é¿ï¼‰
         book = excel.Workbooks.Open(gDbPath, 0, true); 
         
         gPatients = readSheetData(book.Sheets("T_Patients"));
@@ -269,7 +271,7 @@ function loadAllData() {
     } catch(e) {
         if(book) { try{book.Close(false);}catch(e2){} }
         if(excel) { try{excel.Quit();}catch(e2){} }
-        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>“Ç‚İ‚İƒGƒ‰[:<br>" + e.message + "</div>";
+        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>èª­ã¿è¾¼ã¿ã‚¨ãƒ©ãƒ¼:<br>" + e.message + "</div>";
         setStatus("");
     }
 }
@@ -283,13 +285,18 @@ function readSheetData(sheet) {
         
         if (rowCount <= 1) return [];
         
+        // VBArrayã‚’JScripté…åˆ—ã«å¤‰æ›ï¼ˆã“ã‚Œã¯ Column-Major = åˆ—å„ªå…ˆ ã«ãªã‚‹ï¼‰
+        // Index = (ColIndex - 1) * RowCount + (RowIndex - 1)
         var vArray = new VBArray(usedRange.Value).toArray();
+        
+        // ãƒ˜ãƒƒãƒ€ãƒ¼è¡Œ (Row 1) ã®å–å¾—
         var headers = [];
         for(var c=1; c<=colCount; c++) {
             var idx = (c - 1) * rowCount;
             headers.push(vArray[idx]); 
         }
         
+        // ãƒ‡ãƒ¼ã‚¿è¡Œ (Row 2 .. RowCount) ã®å–å¾—
         for(var r=2; r<=rowCount; r++) {
             var rowObj = {};
             var hasData = false;
@@ -299,7 +306,7 @@ function readSheetData(sheet) {
                 var key = headers[c-1];
                 
                 if (val !== undefined && val !== null) {
-                    rowObj[key] = formatDate(key, val);
+                    rowObj[key] = formatDate(val);
                     if (val !== "") hasData = true;
                 } else {
                     rowObj[key] = "";
@@ -307,19 +314,14 @@ function readSheetData(sheet) {
             }
             if(hasData) data.push(rowObj);
         }
-    } catch(e) { }
+        
+    } catch(e) { /* Ignore sheet errors */ }
     return data;
 }
 
-function formatDate(key, val) {
-    // Only format if the column name implies a date, or if its a Date object
-    var dateKeys = ["BirthDate", "RegistrationDate", "èp“ú", "İ’è“ú", "Œv‘ª“ú", "“o˜^“ú"];
-    var isDateKey = false;
-    for(var i=0; i<dateKeys.length; i++) { if(key == dateKeys[i]) isDateKey = true; }
-    
-    if(!isDateKey) return val + "";
-
+function formatDate(val) {
     try {
+        // Excelæ—¥ä»˜ã‚·ãƒªã‚¢ãƒ«ã®åˆ¤å®šã¨å¤‰æ›ã¯è¤‡é›‘ãªã®ã§ã€Dateã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãªã‚‰å¤‰æ›
         var d = new Date(val);
         if(!isNaN(d) && d.getFullYear() > 1900) {
              var y = d.getFullYear();
@@ -332,11 +334,14 @@ function formatDate(key, val) {
 }
 
 // --- Logic ---
+
 function showTab(mode) {
     document.getElementById('btn-list').className = 'sidebar-tab' + (mode=='list'?' active':'');
     document.getElementById('btn-info').className = 'sidebar-tab' + (mode=='info'?' active':'');
     document.getElementById('tab-list').className = 'sidebar-content' + (mode=='list'?' active':'');
     document.getElementById('tab-info').className = 'sidebar-content' + (mode=='info'?' active':'');
+    
+    // Refresh list if returning
     if(mode == 'list') filterList();
 }
 
@@ -344,35 +349,28 @@ function renderPatientList() {
     var container = document.getElementById("patient-list-container");
     var html = "";
     var count = 0;
+    
     for(var i=0; i<gPatients.length; i++) {
         var p = gPatients[i];
-        if(!p["Name"]) continue;
+        if(!p["æ°å"]) continue;
+        
         html += "<div class='patient-list-item' pid='" + p["PatientID"] + "' onclick='selectPatient(\"" + p["PatientID"] + "\")'>";
-        html += "<div class='pt-name'>" + p["Name"] + " (" + (p["NameKana"] || "") + ")</div>";
-        html += "<div class='pt-id'>" + p["PatientID"] + "</div>";
+        html += "<div class='pt-name'>" + p["æ°å"] + "</div>";
+        html += "<div class='pt-id'>" + p["ã‚«ãƒ«ãƒ†ç•ªå·"] + "</div>";
         html += "</div>";
         count++;
     }
-    if (count === 0) html = "<div class='empty-msg'>ƒf[ƒ^‚È‚µ</div>";
+    
+    if (count === 0) html = "<div class='empty-msg'>ãƒ‡ãƒ¼ã‚¿ãªã—</div>";
+    
     container.innerHTML = html;
-    setStatus(count + " Œ");
-}
-
-function calculateAge(birthDateStr) {
-    if (!birthDateStr) return "-";
-    try {
-        var birthDate = new Date(birthDateStr);
-        if (isNaN(birthDate)) return "-";
-        var today = new Date();
-        var age = today.getFullYear() - birthDate.getFullYear();
-        var m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-        return age + "Î";
-    } catch(e) { return "-"; }
+    setStatus(count + " ä»¶");
+    filterList();
 }
 
 function selectPatient(pid) {
     gCurrentPID = pid;
+    
     var items = document.getElementsByClassName("patient-list-item");
     for(var i=0; i<items.length; i++) {
         items[i].className = "patient-list-item";
@@ -386,34 +384,38 @@ function selectPatient(pid) {
     
     if (p) {
         var html = "<div style='text-align:center; padding:20px 0;'>";
-        html += "<div style='font-size:18px; font-weight:bold; color:#fff;'>" + (p["Name"] || "No Name") + "</div>";
+        html += "<div style='font-size:48px; margin-bottom:10px;'></div>";
+        html += "<div style='font-size:18px; font-weight:bold; color:#fff;'>" + p["æ°å"] + "</div>";
         html += "</div>";
+        
         html += "<table class='detail-table'>";
-        html += "<tr><td><span class='detail-label'>Š³ÒID / ƒJƒ‹ƒe”Ô†</span><span class='detail-value'>" + (p["PatientID"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>–¼ (ƒJƒi)</span><span class='detail-value'>" + (p["Name"] || "-") + " (" + (p["NameKana"] || "-") + ")</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>«•Ê / ¶”NŒ“ú</span><span class='detail-value'>" + (p["Sex"] || "-") + " / " + (p["BirthDate"] || "-") + " (" + calculateAge(p["BirthDate"]) + ")</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>ZŠ</span><span class='detail-value'>§" + (p["PostalCode"] || "-") + "<br>" + (p["Address"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>“d˜b”Ô†</span><span class='detail-value'>" + (p["Phone"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>MRI‘Î‰</span><span class='detail-value'>" + (p["MRICompatible"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>RMS“±“ü / ‘—M‹@</span><span class='detail-value'>" + (p["RMS_Enabled"] || "No") + " / " + (p["RMS_TransmitterType"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>“o˜^“ú</span><span class='detail-value'>" + (p["RegistrationDate"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>ã‚«ãƒ«ãƒ†ç•ªå·</span><span class='detail-value'>" + p["ã‚«ãƒ«ãƒ†ç•ªå·"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>ç”Ÿå¹´æœˆæ—¥</span><span class='detail-value'>" + p["ç”Ÿå¹´æœˆæ—¥"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>æ€§åˆ¥</span><span class='detail-value'>" + p["æ€§åˆ¥"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>é›»è©±ç•ªå·</span><span class='detail-value'>" + p["é›»è©±ç•ªå·"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>åŸç–¾æ‚£</span><span class='detail-value'>" + p["åŸç–¾æ‚£"] + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>ä½æ‰€</span><span class='detail-value'>" + p["ä½æ‰€"] + "</span></td></tr>";
         html += "</table>";
         
         document.getElementById("patient-detail-container").innerHTML = html;
-        document.getElementById("current-patient-name").innerText = (p["Name"] || "") + " —l";
+        document.getElementById("current-patient-name").innerText = p["æ°å"] + " æ§˜";
         
-        renderSubData(gDevices, "PatientID", pid, "device-body", ["èp“ú", "–{‘Ìƒ[ƒJ[", "–{‘ÌŒ^”Ô", "–{‘ÌSerial", "ƒXƒe[ƒ^ƒX"]);
-        renderSubData(gSettings, "PatientID", pid, "settings-body", ["İ’è“ú", "Mode", "LowerRate", "UpperRate", "AV_Delay"]);
-        renderSubData(gMeasurements, "PatientID", pid, "measurement-body", ["Œv‘ª“ú", "Sensing_A", "Sensing_V", "Impedance_A", "Impedance_RV"]);
+        renderSubData(gDevices, "PatientID", pid, "device-body", ["æ‰‹è¡“æ—¥", "æœ¬ä½“ãƒ¡ãƒ¼ã‚«ãƒ¼", "æœ¬ä½“å‹ç•ª", "æœ¬ä½“Serial", "ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹"]);
+        renderSubData(gSettings, "PatientID", pid, "settings-body", ["è¨­å®šæ—¥", "Mode", "LowerRate", "UpperRate", "AV_Delay"]);
+        renderSubData(gMeasurements, "PatientID", pid, "measurement-body", ["è¨ˆæ¸¬æ—¥", "Sensing_A", "Sensing_V", "Impedance_A", "Impedance_RV"]);
+        
         showTab('info');
     }
 }
 
 function renderSubData(sourceArray, keyField, keyVal, targetId, headers) {
-    var html = "<div class='empty-msg'>—š—ğ‚È‚µ</div>";
+    var html = "<div class='empty-msg'>å±¥æ­´ãªã—</div>";
     var rows = [];
+    
     for(var i=0; i<sourceArray.length; i++) {
-        if(sourceArray[i][keyField] == keyVal) rows.push(sourceArray[i]);
+        if(sourceArray[i][keyField] == keyVal) {
+            rows.push(sourceArray[i]);
+        }
     }
     rows.sort(function(a,b){ return (a[headers[0]] < b[headers[0]]) ? 1 : -1; });
     
@@ -421,15 +423,16 @@ function renderSubData(sourceArray, keyField, keyVal, targetId, headers) {
         html = "<table><tr>";
         for(var h=0; h<headers.length; h++) html += "<th>"+headers[h]+"</th>";
         html += "</tr>";
+        
         for(var i=0; i<rows.length; i++) {
             html += "<tr>";
             for(var h=0; h<headers.length; h++) {
                 var val = rows[i][headers[h]];
-                if(headers[h]=="ƒXƒe[ƒ^ƒX") {
+                if(headers[h]=="ã‚¹ãƒ†ãƒ¼ã‚¿ã‚¹") {
                     if(val=="Active") val = "<span class='status-active'>Active</span>";
                     else val = "<span class='status-old'>Old</span>";
                 }
-                html += "<td>" + (val || "") + "</td>";
+                html += "<td>" + val + "</td>";
             }
             html += "</tr>";
         }
@@ -447,124 +450,202 @@ function filterList() {
     }
 }
 
+// --- Lock & Save (Concurrency Control) ---
+function generateID(prefix) {
+    var d = new Date();
+    return prefix + d.getFullYear() + (d.getMonth()+1) + d.getDate() + d.getHours() + d.getMinutes() + d.getSeconds();
+}
+
 function acquireLock() {
     var fso = new ActiveXObject("Scripting.FileSystemObject");
+    // Check if lock exists
     if (fso.FileExists(gLockPath)) return false;
     try {
-        var f = fso.CreateTextFile(gLockPath, false);
+        var f = fso.CreateTextFile(gLockPath, false); // Fail if exists
         f.WriteLine(new Date());
         f.Close();
         return true;
-    } catch(e) { return false; }
+    } catch(e) {
+        return false;
+    }
 }
 
 function releaseLock() {
     var fso = new ActiveXObject("Scripting.FileSystemObject");
-    if(fso.FileExists(gLockPath)) { try { fso.DeleteFile(gLockPath, true); } catch(e){} }
+    if(fso.FileExists(gLockPath)) {
+        try { fso.DeleteFile(gLockPath, true); } catch(e){}
+    }
 }
 
 function savePatient() {
-    if (!acquireLock()) { alert("‘¼‚Ìƒ†[ƒU[‚ª•ÒW’†‚Å‚·B"); return; }
-    var excel = null; var book = null;
+    setStatus("ä¿å­˜æº–å‚™ä¸­...");
+    
+    // Lock Retry Loop with setTimeout is hard in synchronous flow.
+    // We try once, if locked, user must retry. Or simple loop.
+    
+    if (!acquireLock()) {
+        alert("ä»–ã®ãƒ¦ãƒ¼ã‚¶ãƒ¼ãŒç·¨é›†ä¸­ã§ã™ã€‚æ•°ç§’å¾…ã£ã¦ã‹ã‚‰å†åº¦ã€Œç™»éŒ²ã€ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚");
+        setStatus("");
+        return;
+    }
+    
+    var excel = null;
+    var book = null;
+    
     try {
-        var pid = document.getElementById('np_pid').value;
-        var name = document.getElementById('np_name').value;
-        var kana = document.getElementById('np_kana').value;
-        var birth = document.getElementById('np_birth').value;
-        var sex = document.getElementById('np_sex').value;
-        var zip = document.getElementById('np_zip').value;
-        var addr = document.getElementById('np_addr').value;
-        var tel = document.getElementById('np_tel').value;
-        var mri = document.getElementById('np_mri').value;
-        var rms_en = document.getElementById('np_rms_en').value;
-        var rms_type = document.getElementById('np_rms_type').value;
-
+        setStatus("Excelã¸æ›¸ãè¾¼ã¿ä¸­...");
+        
+        var k = document.getElementById('np_karte').value;
+        var n = document.getElementById('np_name').value;
+        var b = document.getElementById('np_birth').value;
+        var s = document.getElementById('np_sex').value;
+        var d = document.getElementById('np_dis').value;
+        var a = document.getElementById('np_addr').value;
+        var p = document.getElementById('np_tel').value;
+        var id = generateID("P");
+        
         excel = new ActiveXObject("Excel.Application");
+        excel.Visible = false;
+        excel.DisplayAlerts = false;
+        
+        // Open Read/Write
         book = excel.Workbooks.Open(gDbPath);
         var sheet = book.Sheets("T_Patients");
         var lastRow = sheet.UsedRange.Rows.Count + 1;
-        sheet.Cells(lastRow, 1).Value = pid;
-        sheet.Cells(lastRow, 2).Value = name;
-        sheet.Cells(lastRow, 3).Value = kana;
-        sheet.Cells(lastRow, 4).Value = sex;
-        sheet.Cells(lastRow, 5).Value = birth;
-        sheet.Cells(lastRow, 6).Value = zip;
-        sheet.Cells(lastRow, 7).Value = addr;
-        sheet.Cells(lastRow, 8).Value = "'" + tel;
-        sheet.Cells(lastRow, 9).Value = mri;
-        sheet.Cells(lastRow, 10).Value = rms_en;
-        sheet.Cells(lastRow, 11).Value = rms_type;
-        sheet.Cells(lastRow, 12).Value = new Date().toLocaleDateString();
+        
+        sheet.Cells(lastRow, 1).Value = id;
+        sheet.Cells(lastRow, 2).Value = k;
+        sheet.Cells(lastRow, 3).Value = n;
+        sheet.Cells(lastRow, 4).Value = b;
+        sheet.Cells(lastRow, 5).Value = s;
+        sheet.Cells(lastRow, 6).Value = d;
+        sheet.Cells(lastRow, 7).Value = a;
+        sheet.Cells(lastRow, 8).Value = p;
         
         book.Save();
         book.Close();
         excel.Quit();
+        excel = null;
+        
         closeModal();
         releaseLock();
-        alert("“o˜^Š®—¹");
-        loadAllData();
+        
+        alert("ç™»éŒ²å®Œäº†ã—ã¾ã—ãŸã€‚");
+        loadAllData(); // Reload
+        
     } catch(e) {
-        if(book) book.Close(false); if(excel) excel.Quit();
-        releaseLock(); alert("ƒGƒ‰[: " + e.message);
+        if(book) { try{book.Close(false);}catch(e2){} }
+        if(excel) { try{excel.Quit();}catch(e2){} }
+        releaseLock(); // Make sure to release
+        alert("ä¿å­˜ã‚¨ãƒ©ãƒ¼: " + e.message);
+        setStatus("");
     }
 }
 
 function showNewPatientModal() {
     var modal = document.getElementById("modal-overlay");
     var content = document.getElementById("modal-content");
-    var html = "<div class='modal-title'>V‹KŠ³Ò“o˜^</div>";
-    html += "<div style='height:400px; overflow-y:auto; padding-right:10px;'>";
-    html += "<div class='form-group'><label class='form-label'>Š³ÒID / ƒJƒ‹ƒe”Ô†</label><input class='form-input' id='np_pid'></div>";
-    html += "<div class='form-group'><label class='form-label'>–¼</label><input class='form-input' id='np_name'></div>";
-    html += "<div class='form-group'><label class='form-label'>–¼iƒJƒij</label><input class='form-input' id='np_kana'></div>";
-    html += "<div class='form-group'><label class='form-label'>¶”NŒ“ú</label><input class='form-input' type='date' id='np_birth'></div>";
-    html += "<div class='form-group'><label class='form-label'>«•Ê</label><select class='form-input' id='np_sex'><option>’j</option><option>—</option></select></div>";
-    html += "<hr style='margin:15px 0; border:0; border-top:1px solid #eee;'>";
-    html += "<div class='form-group'><label class='form-label'>—X•Ö”Ô†</label><input class='form-input' id='np_zip'></div>";
-    html += "<div class='form-group'><label class='form-label'>ZŠ</label><input class='form-input' id='np_addr'></div>";
-    html += "<div class='form-group'><label class='form-label'>“d˜b”Ô†</label><input class='form-input' id='np_tel'></div>";
-    html += "<hr style='margin:15px 0; border:0; border-top:1px solid #eee;'>";
-    html += "<div class='form-group'><label class='form-label'>MRI‘Î‰</label><select class='form-input' id='np_mri'><option>Yes</option><option>No</option></select></div>";
-    html += "<div class='form-group'><label class='form-label'>RMS“±“ü</label><select class='form-input' id='np_rms_en'><option>Yes</option><option>No</option></select></div>";
-    html += "<div class='form-group'><label class='form-label'>‰“Šu‘—M‹@‚Ìí—Ş</label><input class='form-input' id='np_rms_type'></div>";
+    var html = "<div class='modal-title'>æ–°è¦æ‚£è€…ç™»éŒ²</div>";
+    
+    html += "<div class='form-group'><label class='form-label'>ã‚«ãƒ«ãƒ†ç•ªå·</label><input class='form-input' id='np_karte'></div>";
+    html += "<div class='form-group'><label class='form-label'>æ°å</label><input class='form-input' id='np_name'></div>";
+    html += "<div class='form-group'><label class='form-label'>ç”Ÿå¹´æœˆæ—¥</label><input class='form-input' type='date' id='np_birth'></div>";
+    html += "<div class='form-group'><label class='form-label'>æ€§åˆ¥</label><select class='form-input' id='np_sex'><option>ç”·</option><option>å¥³</option></select></div>";
+    html += "<div class='form-group'><label class='form-label'>åŸç–¾æ‚£</label><input class='form-input' id='np_dis'></div>";
+    html += "<div class='form-group'><label class='form-label'>ä½æ‰€</label><input class='form-input' id='np_addr'></div>";
+    html += "<div class='form-group'><label class='form-label'>é›»è©±ç•ªå·</label><input class='form-input' id='np_tel'></div>";
+    
+    html += "<div style='text-align:right; margin-top:20px;'>";
+    html += "<button class='btn btn-secondary' onclick='closeModal()'>ã‚­ãƒ£ãƒ³ã‚»ãƒ«</button> ";
+    html += "<button class='btn btn-primary' onclick='savePatient()'>ç™»éŒ²ä¿å­˜</button>";
     html += "</div>";
-    html += "<div style='text-align:right; margin-top:20px;'><button class='btn btn-secondary' onclick='closeModal()'>ƒLƒƒƒ“ƒZƒ‹</button> <button class='btn btn-primary' onclick='savePatient()'>•Û‘¶</button></div>";
+    
     content.innerHTML = html;
     modal.style.display = "flex";
 }
 function closeModal() { document.getElementById("modal-overlay").style.display = "none"; }
-function showDeviceModal() { alert("–¢À‘•"); }
-function showSettingsModal() { alert("–¢À‘•"); }
-function showMeasurementModal() { alert("–¢À‘•"); }
+function showDeviceModal() { alert("æœªå®Ÿè£…"); }
+function showSettingsModal() { alert("æœªå®Ÿè£…"); }
+function showMeasurementModal() { alert("æœªå®Ÿè£…"); }
+
 </script>
 </head>
 <body>
+
 <div id="sidebar-panel">
     <div class="sidebar-header">
-        <button id="btn-list" class="sidebar-tab active" onclick="showTab('list')">ƒŠƒXƒg</button>
-        <button id="btn-info" class="sidebar-tab" onclick="showTab('info')">Šî–{î•ñ</button>
+        <button id="btn-list" class="sidebar-tab active" onclick="showTab('list')">ãƒªã‚¹ãƒˆ</button>
+        <button id="btn-info" class="sidebar-tab" onclick="showTab('info')">åŸºæœ¬æƒ…å ±</button>
     </div>
+    
     <div id="tab-list" class="sidebar-content active">
-        <input type="text" class="search-box" id="search-box" onkeyup="filterList()" placeholder="ŒŸõ...">
+        <input type="text" class="search-box" id="search-box" onkeyup="filterList()" placeholder="æ¤œç´¢: ã‚«ãƒ«ãƒ†No / æ°å">
         <div id="status-msg" style="color:#fcd34d; font-size:12px; margin-bottom:5px;">Loading...</div>
         <div id="patient-list-container"></div>
+        
         <div style="margin-top:20px; padding-top:20px; border-top:1px solid #334155;">
-            <button class="btn btn-primary btn-block" onclick="showNewPatientModal()">{ V‹KŠ³Ò“o˜^</button>
+            <button class="btn btn-primary btn-block" onclick="showNewPatientModal()">ï¼‹ æ–°è¦æ‚£è€…ç™»éŒ²</button>
+            <button class="btn btn-secondary btn-block" style="background:#334155; color:#ccc; border:1px solid #475569;" onclick="alert('CSVå–è¾¼')"> CSVå–è¾¼</button>
         </div>
     </div>
-    <div id="tab-info" class="sidebar-content"><div id="patient-detail-container"></div></div>
+    
+    <div id="tab-info" class="sidebar-content">
+        <div id="patient-detail-container">
+            <div style="text-align:center; padding-top:60px; color:#94a3b8;">
+                <p>ãƒªã‚¹ãƒˆã‹ã‚‰<br>æ‚£è€…ã‚’é¸æŠã—ã¦ãã ã•ã„</p>
+                <br>
+                <button class="btn btn-secondary" style="background:#334155; color:#fff;" onclick="showTab('list')">ãƒªã‚¹ãƒˆã«æˆ»ã‚‹</button>
+            </div>
+        </div>
+    </div>
 </div>
+
 <div id="main-panel">
     <div class="main-header">
-        <div class="app-title"> CIEDs Š³ÒŠÇ—ƒVƒXƒeƒ€ <span id="loading-indicator" class="loader">’ÊM’†...</span></div>
+        <div class="app-title"> CIEDs æ‚£è€…ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ  <span id="loading-indicator" class="loader">é€šä¿¡ä¸­...</span></div>
         <div id="current-patient-name" class="current-patient-name"></div>
     </div>
+    
     <div class="cards-area">
-        <div class="card"><div class="card-header blue"><div class="card-title">ƒfƒoƒCƒXî•ñ</div><button class="btn btn-secondary" onclick="showDeviceModal()">’Ç‰Á</button></div><div class="card-body" id="device-body"></div></div>
-        <div class="card"><div class="card-header green"><div class="card-title">İ’èî•ñ</div><button class="btn btn-secondary" onclick="showSettingsModal()">’Ç‰Á</button></div><div class="card-body" id="settings-body"></div></div>
-        <div class="card"><div class="card-header yellow"><div class="card-title">‘ª’èî•ñ</div><button class="btn btn-secondary" onclick="showMeasurementModal()">’Ç‰Á</button></div><div class="card-body" id="measurement-body"></div></div>
+        <!-- Device -->
+        <div class="card">
+            <div class="card-header blue">
+                <div class="card-title"> ãƒ‡ãƒã‚¤ã‚¹æƒ…å ±</div>
+                <button class="btn btn-secondary" onclick="showDeviceModal()">è¿½åŠ </button>
+            </div>
+            <div class="card-body" id="device-body">
+                <div class="empty-msg">ãƒ‡ãƒ¼ã‚¿ãªã—</div>
+            </div>
+        </div>
+        
+        <!-- Settings -->
+        <div class="card">
+            <div class="card-header green">
+                <div class="card-title"> è¨­å®šæƒ…å ±</div>
+                <button class="btn btn-secondary" onclick="showSettingsModal()">è¿½åŠ </button>
+            </div>
+            <div class="card-body" id="settings-body">
+                <div class="empty-msg">ãƒ‡ãƒ¼ã‚¿ãªã—</div>
+            </div>
+        </div>
+        
+        <!-- Measurements -->
+        <div class="card">
+            <div class="card-header yellow">
+                <div class="card-title"> æ¸¬å®šæƒ…å ±</div>
+                <button class="btn btn-secondary" onclick="showMeasurementModal()">è¿½åŠ </button>
+            </div>
+            <div class="card-body" id="measurement-body">
+                <div class="empty-msg">ãƒ‡ãƒ¼ã‚¿ãªã—</div>
+            </div>
+        </div>
     </div>
 </div>
-<div id="modal-overlay" class="modal-overlay"><div id="modal-content" class="modal-box"></div></div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay">
+    <div id="modal-content" class="modal-box"></div>
+</div>
+
 </body>
 </html>

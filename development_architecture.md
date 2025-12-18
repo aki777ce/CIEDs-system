@@ -48,13 +48,13 @@
 各シートの1行目をヘッダーとして扱います。
 
 *   **T_Patients**: 患者基本情報
-    *   `PatientID`, `カルテ番号`, `氏名`, `生年月日`, `性別`, `原疾患`, `住所`, `電話番号`
+    *   `PatientID`, `Name`, `NameKana`, `Sex`, `BirthDate`, `PostalCode`, `Address`, `Phone`, `MRICompatible`, `RMS_Enabled`, `RMS_TransmitterType`, `RegistrationDate`
 *   **T_DeviceConfig**: デバイス植込み履歴
-    *   `PatientID`, `手術日`, `本体メーカー`, `本体型番`, `本体Serial`, `ステータス`
+    *   `ConfigID`, `PatientID`, `手術日`, `本体メーカー`, `本体型番`, `本体Serial`, `ステータス` (注: 内部項目は順次英語化検討)
 *   **T_Settings**: 設定履歴
-    *   `PatientID`, `設定日`, `Mode`, `LowerRate`, `UpperRate`, `AV_Delay`
+    *   `SettingID`, `PatientID`, `設定日`, `Mode`, `LowerRate`, `UpperRate`, `AV_Delay`
 *   **T_Measurements**: 測定履歴
-    *   `PatientID`, `計測日`, `Sensing_A`, `Sensing_V`, `Impedance_A`, `Impedance_RV`
+    *   `MeasureID`, `PatientID`, `計測日`, `Sensing_A`, `Sensing_V`, `Impedance_A`, `Impedance_RV`
 
 ## 5. 開発時の重要ルール (Do's & Don'ts)
 

@@ -50,20 +50,24 @@
 *   **T_Patients**: 患者基本情報
     *   `PatientID`, `Name`, `NameKana`, `Sex`, `BirthDate`, `PostalCode`, `Address`, `Phone`, `MRICompatible`, `RMS_Enabled`, `RMS_TransmitterType`, `RegistrationDate`
 *   **T_DeviceConfig**: デバイス植込み履歴
-    *   `ConfigID`, `PatientID`, `手術日`, `本体メーカー`, `本体型番`, `本体Serial`, `ステータス` (注: 内部項目は順次英語化検討)
+    *   `ConfigID`, `PatientID`, `ImplantDate`, `ImplantHospital`, `PhysicianPrimary1-3`, `PhysicianOperator1-3`, `SurgerySummary`, `DeviceType`, `Manufacturer`, `ModelNumber`, `SerialNumber`, `ImplantSite`, `GeneratorComment`, `ALead...`, `RVLead...`, `LVLead...`, `Status`
 *   **T_Settings**: 設定履歴
-    *   `SettingID`, `PatientID`, `設定日`, `Mode`, `LowerRate`, `UpperRate`, `AV_Delay`
+    *   `SettingID`, `PatientID`, `SettingDate`, `Mode`, `LowerRate`, `UpperRate`, `AV_Delay`
 *   **T_Measurements**: 測定履歴
-    *   `MeasureID`, `PatientID`, `計測日`, `Sensing_A`, `Sensing_V`, `Impedance_A`, `Impedance_RV`
+    *   `MeasureID`, `PatientID`, `MeasureDate`, `Sensing_A`, `Sensing_V`, `Impedance_A`, `Impedance_RV`
 
 ## 5. 開発時の重要ルール (Do's & Don'ts)
 
 *   **DO (やるべきこと)**:
     *   **Shift_JIS保存**: HTAファイルは必ず **Shift_JIS (ANSI)** エンコーディングで保存してください。UTF-8では文字化けし、スクリプトエラーの原因になります。
         *   PowerShellコマンド: `$content | Out-File -FilePath "..." -Encoding Default`
+    *   **編集時のバックアップ**: エンコーディング変換処理など、ファイル破壊のリスクがある操作を行う前には必ず `CIED_App_UTF8.hta` 等の別名でバックアップを作成すること。
+    *   **英語CamelCase命名**: データベースに追加する新しいカラム名は、JScriptからのプロパティアクセスを安定させるため、**必ず英語（CamelCase）** で命名すること（例: `ImplantDate`）。日本語カラム名はアプリ内での表示ラベルとしてのみ使用する。
     *   **JScriptの使用**: 新機能追加時は必ず `<script language="JavaScript">` ブロック内に記述してください。
 
 *   **DON'T (やってはいけないこと)**:
+    *   **マルチバイト文字のカラム名**: データベースのヘッダーに日本語を直接使用すると、スクリプトエラーの原因になるため避けること。
+    *   **直接のShift_JIS上書き**: UTF-8からShift_JISへの変換時は、一度別ファイルに出力してから上書きするなどの安全策を講じること。
     *   **VBScriptの使用**: 互換性担保のため使用禁止。
     *   **ADODB接続の復活**: 環境依存エラーの原因となるため禁止。
     *   **外部ライブラリ依存**: jQueryやBootstrapなどはCDN経由で使えないため、すべてVanilla JS / CSSで実装すること。

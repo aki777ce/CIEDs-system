@@ -194,23 +194,6 @@ td { padding: 10px 15px; border-bottom: 1px solid #f1f5f9; color: #334155; white
 .form-group { margin-bottom: 15px; }
 .form-label { display: block; font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 5px; }
 .form-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }
-
-/* Detail Page UI */
-#brief-view { display: block; }
-#detail-view { display: none; flex: 1; padding: 25px; overflow-y: auto; background: #f1f5f9; }
-.detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.detail-columns { display: flex; gap: 20px; }
-.detail-column { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 320px; }
-.detail-section-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
-.detail-section-header { padding: 12px 15px; color: #fff; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-.detail-section-header.surgery { background: linear-gradient(135deg, #1e293b, #334155); }
-.detail-section-header.device { background: linear-gradient(135deg, #2563eb, #3b82f6); }
-.detail-section-header.lead-a { background: linear-gradient(135deg, #059669, #10b981); }
-.detail-section-header.lead-rv { background: linear-gradient(135deg, #b91c1c, #dc2626); }
-.detail-section-header.lead-lv { background: linear-gradient(135deg, #d97706, #f59e0b); }
-.detail-section-body { padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.full-width { grid-column: span 2; }
-@media (max-width: 1200px) { .detail-columns { flex-wrap: wrap; } .detail-column { flex: 1 1 45%; } }
 </style>
 
 <script language="JavaScript">
@@ -427,7 +410,6 @@ function selectPatient(pid) {
             ["ImplantDate", "Manufacturer", "ModelNumber", "DeviceType", "SerialNumber", "ImplantSite", "ImplantHospital", "Status"],
             ["植込み日", "メーカー", "型番", "種類", "Serial", "部位", "病院", "状態"],
             "ConfigID");
-        closeDeviceDetailPage();
         renderSubData(gSettings, "PatientID", pid, "settings-body", 
             ["SettingDate", "Mode", "LowerRate", "UpperRate", "AV_Delay"],
             ["設定日", "Mode", "LRL", "URL", "AVD"]);
@@ -471,7 +453,7 @@ function renderSubData(sourceArray, keyField, keyVal, targetId, keys, labels, id
 }
 
 function onRowClick(targetId, id) {
-    if(targetId == "device-body") showDeviceDetailPage(id);
+    if(targetId == "device-body") showDeviceDetailModal(id);
 }
 
 function filterList() {
@@ -535,11 +517,10 @@ function savePatient() {
         book.Save();
         book.Close();
         excel.Quit();
-        releaseLock();
-        alert("保存が完了しました。");
-        loadAllData();
-        if(gCurrentPID) selectPatient(gCurrentPID);
         closeModal();
+        releaseLock();
+        alert("登録完了");
+        loadAllData();
     } catch(e) {
         if(book) book.Close(false); if(excel) excel.Quit();
         releaseLock(); alert("エラー: " + e.message);
@@ -569,148 +550,15 @@ function showNewPatientModal() {
     content.innerHTML = html;
     modal.style.display = "flex";
 }
-function showDeviceModal() {
-    showDeviceDetailPage(null);
-}
-
-var gCurrentConfigID = null;
-
-function showDeviceDetailPage(configID) {
-    if (!gCurrentPID) { alert("患者を選択してください。"); return; }
-    gCurrentConfigID = configID;
-    
-    var d = null;
-    if(configID) {
-        for(var i=0; i<gDevices.length; i++) {
-            if(gDevices[i].ConfigID == configID) { d = gDevices[i]; break; }
-        }
-    }
-
-    document.getElementById("brief-view").style.display = "none";
-    var detailView = document.getElementById("detail-view");
-    detailView.style.display = "block";
-    
-    var html = "<div class='detail-header'>";
-    html += "<div style='display:flex; align-items:center; gap:15px;'>";
-    html += "<button class='btn btn-secondary' onclick='closeDeviceDetailPage()'>← 戻る</button>";
-    html += "<h2 style='color:#0f172a;'>" + (configID ? "デバイス詳細・編集" : "新規デバイス登録") + "</h2>";
-    html += "</div>";
-    html += "<button class='btn btn-primary' style='padding:10px 25px; font-size:15px;' onclick='saveDevice()'>保存する</button>";
-    html += "</div>";
-
-     html += "<div class='detail-columns'>";
-
-    function field(id, label, val, type) {
-        var input = "";
-        if(type == "textarea") {
-            var h = (id == "dv_summary") ? "320px" : "60px";
-            input = "<textarea class='form-input' id='" + id + "' style='height:" + h + "; font-size:12px;'>" + (val || "") + "</textarea>";
-        } else if(type == "select") {
-            input = "<select class='form-input' id='" + id + "' style='font-size:12px; padding:6px;'>";
-            var opts = arguments[4];
-            for(var o=0; o<opts.length; o++) {
-                var sel = (val == opts[o] ? " selected" : "");
-                input += "<option" + sel + ">" + opts[o] + "</option>";
-            }
-            input += "</select>";
-        } else {
-            input = "<input class='form-input' id='" + id + "' type='" + (type || "text") + "' value='" + (val || "") + "' style='font-size:12px; padding:6px;'>";
-        }
-        return "<div class='form-group' style='margin-bottom:8px;'><label class='form-label' style='font-size:11px; margin-bottom:2px;'>" + label + "</label>" + input + "</div>";
-    }
-
-    // Column 1: Surgery
-    html += "<div class='detail-column'>";
-    html += "<div class='detail-section-card' style='height:100%; display:flex; flex-direction:column;'>";
-    html += "<div class='detail-section-header surgery'>＃手術基本情報</div>";
-    html += "<div class='detail-section-body' style='flex:1;'>";
-    html += field("dv_implant_date", "植込み日", d ? d.ImplantDate : "", "date");
-    html += field("dv_implant_hosp", "植込み病院", d ? d.ImplantHospital : "");
-    html += field("dv_phys_p1", "主治医1", d ? d.PhysicianPrimary1 : "");
-    html += field("dv_phys_p2", "主治医2", d ? d.PhysicianPrimary2 : "");
-    html += field("dv_phys_p3", "主治医3", d ? d.PhysicianPrimary3 : "");
-    html += field("dv_phys_o1", "手術医1", d ? d.PhysicianOperator1 : "");
-    html += field("dv_phys_o2", "手術医2", d ? d.PhysicianOperator2 : "");
-    html += field("dv_phys_o3", "手術医3", d ? d.PhysicianOperator3 : "");
-    html += "<div class='full-width' style='flex:1;'>" + field("dv_summary", "手術サマリー", d ? d.SurgerySummary : "", "textarea") + "</div>";
-    html += "</div></div>";
-    html += "</div>"; // end column 1
-
-    // Column 2: Device & RV Lead
-    html += "<div class='detail-column'>";
-    html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header device'>＃本体情報</div>";
-    html += "<div class='detail-section-body'>";
-    html += field("dv_type", "種類", d ? d.DeviceType : "", "select", ["PM (1ch)","PM (2ch)","ICD (1ch)","ICD (2ch)","CRTP","CRTD","S-ICD","Leadless PM"]);
-    html += field("dv_manuf", "メーカー", d ? d.Manufacturer : "");
-    html += field("dv_model", "モデルNo", d ? d.ModelNumber : "");
-    html += field("dv_serial", "シリアルNo", d ? d.SerialNumber : "");
-    html += field("dv_site", "部位", d ? d.ImplantSite : "");
-    html += "<div></div>"; // Placeholder
-    html += "<div class='full-width'>" + field("dv_comment", "コメント", d ? d.GeneratorComment : "") + "</div>";
-    html += "</div></div>";
-
-    html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header lead-rv'>＃RV lead情報</div>";
-    html += "<div class='detail-section-body'>";
-    html += field("dv_rv_manuf", "メーカー", d ? d.RVLeadManufacturer : "");
-    html += field("dv_rv_model", "モデルNo", d ? d.RVLeadModel : "");
-    html += field("dv_rv_len", "長さ(cm)", d ? d.RVLeadLength : "");
-    html += field("dv_rv_site", "部位", d ? d.RVLeadSite : "");
-    html += field("dv_rv_serial", "シリアルNo", d ? d.RVLeadSerial : "");
-    html += field("dv_rv_shock", "形状", d ? d.RVLeadShockType : "", "select", ["-", "DF1/S", "DF1/D", "DF4/S", "DF4/D"]);
-    html += "<div class='full-width'>" + field("dv_rv_comment", "コメント", d ? d.RVLeadComment : "") + "</div>";
-    html += "</div></div>";
-    html += "</div>"; // end column 2
-
-    // Column 3: A Lead & LV Lead
-    html += "<div class='detail-column'>";
-    html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header lead-a'>＃A lead情報</div>";
-    html += "<div class='detail-section-body'>";
-    html += field("dv_a_manuf", "メーカー", d ? d.ALeadManufacturer : "");
-    html += field("dv_a_model", "モデルNo", d ? d.ALeadModel : "");
-    html += field("dv_a_len", "長さ(cm)", d ? d.ALeadLength : "");
-    html += field("dv_a_site", "部位", d ? d.ALeadSite : "");
-    html += field("dv_a_serial", "シリアルNo", d ? d.ALeadSerial : "");
-    html += "<div></div>"; // Placeholder
-    html += "<div class='full-width'>" + field("dv_a_comment", "コメント", d ? d.ALeadComment : "") + "</div>";
-    html += "</div></div>";
-
-    html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header lead-lv'>＃LV lead情報</div>";
-    html += "<div class='detail-section-body'>";
-    html += field("dv_lv_manuf", "メーカー", d ? d.LVLeadManufacturer : "");
-    html += field("dv_lv_model", "モデルNo", d ? d.LVLeadModel : "");
-    html += field("dv_lv_len", "長さ(cm)", d ? d.LVLeadLength : "");
-    html += field("dv_lv_site", "部位", d ? d.LVLeadSite : "");
-    html += field("dv_lv_serial", "シリアルNo", d ? d.LVLeadSerial : "");
-    html += field("dv_lv_port", "形状", d ? d.LVLeadPortType : "", "select", ["-", "IS-1", "IS-4"]);
-    html += "<div class='full-width'>" + field("dv_lv_comment", "コメント", d ? d.LVLeadComment : "") + "</div>";
-    html += "</div></div>";
-    html += "</div>"; // end column 3
-
-    html += "</div>"; // end columns
-    detailView.innerHTML = html;
-}
-
-function closeDeviceDetailPage() {
-    document.getElementById("detail-view").style.display = "none";
-    document.getElementById("brief-view").style.display = "block";
-    gCurrentConfigID = null;
-}
-
 function saveDevice() {
     if (!gCurrentPID) return;
     if (!acquireLock()) { alert("他のユーザーが編集中です。"); return; }
     var excel = null; var book = null;
     try {
-        var loading = document.getElementById("loading-indicator");
-        if(loading) loading.style.display = "inline";
-
         excel = new ActiveXObject("Excel.Application");
         book = excel.Workbooks.Open(gDbPath);
         var sheet = book.Sheets("T_DeviceConfig");
+        var lastRow = sheet.UsedRange.Rows.Count + 1;
         
         var fields = [
             "dv_implant_date", "dv_implant_hosp", 
@@ -722,52 +570,160 @@ function saveDevice() {
             "dv_lv_manuf", "dv_lv_model", "dv_lv_len", "dv_lv_site", "dv_lv_serial", "dv_lv_port", "dv_lv_comment"
         ];
         
-        var targetRow = 0;
-        if(gCurrentConfigID) {
-            var rowCount = sheet.UsedRange.Rows.Count;
-            for(var r=2; r<=rowCount; r++) {
-                if(sheet.Cells(r, 1).Value == gCurrentConfigID) { targetRow = r; break; }
-            }
-        }
-        
-        if(targetRow == 0) {
-            targetRow = sheet.UsedRange.Rows.Count + 1;
-            sheet.Cells(targetRow, 1).Value = "C" + (new Date().getTime());
-            sheet.Cells(targetRow, 2).Value = gCurrentPID;
-            sheet.Cells(targetRow, 38).Value = "Active";
-        }
-
+        sheet.Cells(lastRow, 1).Value = "C" + (new Date().getTime());
+        sheet.Cells(lastRow, 2).Value = gCurrentPID;
         for(var i=0; i<fields.length; i++) {
-            var el = document.getElementById(fields[i]);
-            if(el) {
-                sheet.Cells(targetRow, i + 3).Value = el.value;
-            }
+            var val = document.getElementById(fields[i]).value;
+            sheet.Cells(lastRow, i + 3).Value = val;
         }
+        sheet.Cells(lastRow, 38).Value = "Active";
 
         book.Save();
         book.Close();
         excel.Quit();
+        closeModal();
         releaseLock();
-        
+        alert("デバイス情報を登録しました。");
         loadAllData();
-        if(gCurrentPID) selectPatient(gCurrentPID);
-        closeDeviceDetailPage();
-        
-        if(loading) loading.style.display = "none";
-        alert("保存完了しました。");
-        
     } catch(e) {
         if(book) book.Close(false); if(excel) excel.Quit();
-        releaseLock(); 
-        var loading = document.getElementById("loading-indicator");
-        if(loading) loading.style.display = "none";
-        alert("保存エラー: " + e.message);
+        releaseLock(); alert("エラー: " + e.message);
     }
+}
+
+function showDeviceModal() {
+    if (!gCurrentPID) { alert("患者を選択してください。"); return; }
+    var modal = document.getElementById("modal-overlay");
+    var content = document.getElementById("modal-content");
+    content.className = "modal-box wide";
+    
+    var html = "<div class='modal-title'>デバイス情報登録</div>";
+    html += "<div style='height:500px; overflow-y:auto; padding-right:10px;'>";
+    html += "<div class='form-grid'>";
+    
+    html += "<div class='form-section-title'>＃手術基本情報</div>";
+    html += "<div class='form-group'><label class='form-label'>植込み日</label><input type='date' class='form-input' id='dv_implant_date'></div>";
+    html += "<div class='form-group'><label class='form-label'>植込み病院</label><input class='form-input' id='dv_implant_hosp'></div>";
+    html += "<div class='form-group'><label class='form-label'>主治医1</label><input class='form-input' id='dv_phys_p1'></div>";
+    html += "<div class='form-group'><label class='form-label'>主治医2</label><input class='form-input' id='dv_phys_p2'></div>";
+    html += "<div class='form-group'><label class='form-label'>主治医3</label><input class='form-input' id='dv_phys_p3'></div>";
+    html += "<div class='form-group'><label class='form-label'>手術医1</label><input class='form-input' id='dv_phys_o1'></div>";
+    html += "<div class='form-group'><label class='form-label'>手術医2</label><input class='form-input' id='dv_phys_o2'></div>";
+    html += "<div class='form-group'><label class='form-label'>手術医3</label><input class='form-input' id='dv_phys_o3'></div>";
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>手術サマリー</label><textarea class='form-input' id='dv_summary' style='height:60px;'></textarea></div>";
+
+    html += "<div class='form-section-title'>＃本体情報</div>";
+    html += "<div class='form-group'><label class='form-label'>デバイス種類</label><select class='form-input' id='dv_type'><option>PM (1ch)</option><option>PM (2ch)</option><option>ICD (1ch)</option><option>ICD (2ch)</option><option>CRTP</option><option>CRTD</option><option>S-ICD</option><option>Leadless PM</option></select></div>";
+    html += "<div class='form-group'><label class='form-label'>メーカー名</label><input class='form-input' id='dv_manuf'></div>";
+    html += "<div class='form-group'><label class='form-label'>モデルNo</label><input class='form-input' id='dv_model'></div>";
+    html += "<div class='form-group'><label class='form-label'>シリアルNo</label><input class='form-input' id='dv_serial'></div>";
+    html += "<div class='form-group'><label class='form-label'>植込み部位</label><input class='form-input' id='dv_site'></div>";
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>コメント欄</label><input class='form-input' id='dv_comment'></div>";
+
+    html += "<div class='form-section-title'>＃A lead情報</div>";
+    html += "<div class='form-group'><label class='form-label'>メーカー名</label><input class='form-input' id='dv_a_manuf'></div>";
+    html += "<div class='form-group'><label class='form-label'>モデルNo</label><input class='form-input' id='dv_a_model'></div>";
+    html += "<div class='form-group'><label class='form-label'>リード長</label><input class='form-input' id='dv_a_len'></div>";
+    html += "<div class='form-group'><label class='form-label'>植込み部位</label><input class='form-input' id='dv_a_site'></div>";
+    html += "<div class='form-group'><label class='form-label'>シリアルNo</label><input class='form-input' id='dv_a_serial'></div>";
+    html += "<div class='form-group'><label class='form-label'>コメント欄</label><input class='form-input' id='dv_a_comment'></div>";
+
+    html += "<div class='form-section-title'>＃RV lead情報</div>";
+    html += "<div class='form-group'><label class='form-label'>メーカー名</label><input class='form-input' id='dv_rv_manuf'></div>";
+    html += "<div class='form-group'><label class='form-label'>モデルNo</label><input class='form-input' id='dv_rv_model'></div>";
+    html += "<div class='form-group'><label class='form-label'>リード長</label><input class='form-input' id='dv_rv_len'></div>";
+    html += "<div class='form-group'><label class='form-label'>植込み部位</label><input class='form-input' id='dv_rv_site'></div>";
+    html += "<div class='form-group'><label class='form-label'>シリアルNo</label><input class='form-input' id='dv_rv_serial'></div>";
+    html += "<div class='form-group'><label class='form-label'>ショックリード形状</label><select class='form-input' id='dv_rv_shock'><option>-</option><option>DF1 / Single coil</option><option>DF1 / Dual coil</option><option>DF4 / Single coil</option><option>DF4 / Dual coil</option></select></div>";
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>コメント欄</label><input class='form-input' id='dv_rv_comment'></div>";
+
+    html += "<div class='form-section-title'>＃LV lead情報</div>";
+    html += "<div class='form-group'><label class='form-label'>メーカー名</label><input class='form-input' id='dv_lv_manuf'></div>";
+    html += "<div class='form-group'><label class='form-label'>モデルNo</label><input class='form-input' id='dv_lv_model'></div>";
+    html += "<div class='form-group'><label class='form-label'>リード長</label><input class='form-input' id='dv_lv_len'></div>";
+    html += "<div class='form-group'><label class='form-label'>植込み部位</label><input class='form-input' id='dv_lv_site'></div>";
+    html += "<div class='form-group'><label class='form-label'>シリアルNo</label><input class='form-input' id='dv_lv_serial'></div>";
+    html += "<div class='form-group'><label class='form-label'>リード形状</label><select class='form-input' id='dv_lv_port'><option>-</option><option>IS-1</option><option>IS-4</option></select></div>";
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>コメント欄</label><input class='form-input' id='dv_lv_comment'></div>";
+
+    html += "</div></div>";
+    html += "<div style='text-align:right; margin-top:20px;'><button class='btn btn-secondary' onclick='closeModal()'>キャンセル</button> <button class='btn btn-primary' onclick='saveDevice()'>保存</button></div>";
+    content.innerHTML = html;
+    modal.style.display = "flex";
 }
 function closeModal() { document.getElementById("modal-overlay").style.display = "none"; document.getElementById("modal-content").className = "modal-box"; }
 function showSettingsModal() { alert("未実装"); }
 function showMeasurementModal() { alert("未実装"); }
 
+function showDeviceDetailModal(configID) {
+    var d = null;
+    for(var i=0; i<gDevices.length; i++) {
+        if(gDevices[i].ConfigID == configID) { d = gDevices[i]; break; }
+    }
+    if(!d) return;
+
+    var modal = document.getElementById("modal-overlay");
+    var content = document.getElementById("modal-content");
+    content.className = "modal-box wide";
+    
+    var html = "<div class='modal-title'>デバイス詳細情報</div>";
+    html += "<div style='height:450px; overflow-y:auto; padding-right:10px;'>";
+    html += "<div class='form-grid'>";
+    
+    function addDetail(label, val) {
+        return "<div class='form-group'><label class='form-label'>" + label + "</label><div style='padding:8px; background:#f8fafc; border-radius:4px; border:1px solid #e2e8f0; font-size:13px;'>" + (val || "-") + "</div></div>";
+    }
+
+    html += "<div class='form-section-title'>＃手術基本情報</div>";
+    html += addDetail("植込み日", d.ImplantDate);
+    html += addDetail("植込み病院", d.ImplantHospital);
+    html += addDetail("主治医1", d.PhysicianPrimary1);
+    html += addDetail("主治医2", d.PhysicianPrimary2);
+    html += addDetail("主治医3", d.PhysicianPrimary3);
+    html += addDetail("手術医1", d.PhysicianOperator1);
+    html += addDetail("手術医2", d.PhysicianOperator2);
+    html += addDetail("手術医3", d.PhysicianOperator3);
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>手術サマリー</label><div style='padding:8px; background:#f8fafc; border-radius:4px; border:1px solid #e2e8f0; font-size:13px; min-height:60px; white-space:pre-wrap;'>" + (d.SurgerySummary || "-") + "</div></div>";
+
+    html += "<div class='form-section-title'>＃本体情報</div>";
+    html += addDetail("デバイス種類", d.DeviceType);
+    html += addDetail("メーカー名", d.Manufacturer);
+    html += addDetail("モデルNo", d.ModelNumber);
+    html += addDetail("シリアルNo", d.SerialNumber);
+    html += addDetail("植込み部位", d.ImplantSite);
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>コメント欄</label><div style='padding:8px; background:#f8fafc; border-radius:4px; border:1px solid #e2e8f0; font-size:13px;'>" + (d.GeneratorComment || "-") + "</div></div>";
+
+    html += "<div class='form-section-title'>＃A lead情報</div>";
+    html += addDetail("メーカー名", d.ALeadManufacturer);
+    html += addDetail("モデルNo", d.ALeadModel);
+    html += addDetail("リード長", d.ALeadLength);
+    html += addDetail("植込み部位", d.ALeadSite);
+    html += addDetail("シリアルNo", d.ALeadSerial);
+    html += addDetail("コメント欄", d.ALeadComment);
+
+    html += "<div class='form-section-title'>＃RV lead情報</div>";
+    html += addDetail("メーカー名", d.RVLeadManufacturer);
+    html += addDetail("モデルNo", d.RVLeadModel);
+    html += addDetail("リード長", d.RVLeadLength);
+    html += addDetail("植込み部位", d.RVLeadSite);
+    html += addDetail("シリアルNo", d.RVLeadSerial);
+    html += addDetail("ショックリード形状", d.RVLeadShockType);
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>コメント欄</label><div style='padding:8px; background:#f8fafc; border-radius:4px; border:1px solid #e2e8f0; font-size:13px;'>" + (d.RVLeadComment || "-") + "</div></div>";
+
+    html += "<div class='form-section-title'>＃LV lead情報</div>";
+    html += addDetail("メーカー名", d.LVLeadManufacturer);
+    html += addDetail("モデルNo", d.LVLeadModel);
+    html += addDetail("リード長", d.LVLeadLength);
+    html += addDetail("植込み部位", d.LVLeadSite);
+    html += addDetail("シリアルNo", d.LVLeadSerial);
+    html += addDetail("リード形状", d.LVLeadPortType);
+    html += "<div class='form-group' style='grid-column: span 2;'><label class='form-label'>コメント欄</label><div style='padding:8px; background:#f8fafc; border-radius:4px; border:1px solid #e2e8f0; font-size:13px;'>" + (d.LVLeadComment || "-") + "</div></div>";
+
+    html += "</div></div>";
+    html += "<div style='text-align:right; margin-top:20px;'><button class='btn btn-primary' onclick='closeModal()'>閉じる</button></div>";
+    content.innerHTML = html;
+    modal.style.display = "flex";
+}
 </script>
 </head>
 <body>
@@ -791,19 +747,14 @@ function showMeasurementModal() { alert("未実装"); }
         <div class="app-title"> CIEDs 患者管理システム <span id="loading-indicator" class="loader">通信中...</span></div>
         <div id="current-patient-name" class="current-patient-name"></div>
     </div>
-    <div id="brief-view" class="cards-area">
+    <div class="cards-area">
         <div class="card"><div class="card-header blue"><div class="card-title">デバイス情報</div><button class="btn btn-secondary" onclick="showDeviceModal()">追加</button></div><div class="card-body" id="device-body"></div></div>
         <div class="card"><div class="card-header green"><div class="card-title">設定情報</div><button class="btn btn-secondary" onclick="showSettingsModal()">追加</button></div><div class="card-body" id="settings-body"></div></div>
         <div class="card"><div class="card-header yellow"><div class="card-title">測定情報</div><button class="btn btn-secondary" onclick="showMeasurementModal()">追加</button></div><div class="card-body" id="measurement-body"></div></div>
     </div>
-    <div id="detail-view"></div>
 </div>
 <div id="modal-overlay" class="modal-overlay"><div id="modal-content" class="modal-box"></div></div>
 </body>
 </html>
-
-
-
-
 
 

@@ -1,4 +1,4 @@
-<html>
+ï»¿<html>
 <head>
 <title>CIEDs Patient Management System</title>
 <HTA:APPLICATION
@@ -199,7 +199,7 @@ td { padding: 10px 15px; border-bottom: 1px solid #f1f5f9; color: #334155; white
 #brief-view { display: block; }
 #detail-view { display: none; flex: 1; padding: 25px; overflow-y: auto; background: #f1f5f9; }
 .detail-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.detail-columns { display: flex; gap: 20px; }
+.detail-columns { display: flex; gap: 20px; align-items: flex-start; }
 .detail-column { flex: 1; display: flex; flex-direction: column; gap: 20px; min-width: 320px; }
 .detail-section-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; border: 1px solid #e2e8f0; }
 .detail-section-header { padding: 12px 15px; color: #fff; font-weight: bold; font-size: 14px; display: flex; align-items: center; gap: 8px; }
@@ -242,14 +242,14 @@ window.onload = function() {
         gLockPath = fso.GetParentFolderName(path) + "\\CIED_DB.lock";
         
         if (!fso.FileExists(gDbPath)) {
-            document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>ƒtƒ@ƒCƒ‹‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ:<br>" + gDbPath + "</div>";
+            document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>ç¹è¼”ãƒç¹§ï½¤ç¹ï½«ç¸ºç‘šï½¦ä¹â–½ç¸ºä¹ï½Šç¸ºï½¾ç¸ºå¸™ï½“:<br>" + gDbPath + "</div>";
             return;
         }
 
         loadAllData();
         
     } catch(e) {
-        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>‹N“®ƒGƒ‰[:<br>" + e.message + "</div>";
+        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>è¥ï½·èœè¼”ãŠç¹ï½©ç¹ï½¼:<br>" + e.message + "</div>";
     }
 };
 
@@ -265,7 +265,7 @@ function setStatus(msg) {
 
 // --- Excel Automation (Read) ---
 function loadAllData() {
-    setStatus("ƒf[ƒ^“¯Šú’†...");
+    setStatus("ç¹ãƒ»ãƒ»ç¹§ï½¿èœ·æ¢§æ‚„è³ï½­...");
     
     var excel = null;
     var book = null;
@@ -290,7 +290,7 @@ function loadAllData() {
     } catch(e) {
         if(book) { try{book.Close(false);}catch(e2){} }
         if(excel) { try{excel.Quit();}catch(e2){} }
-        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>“Ç‚İ‚İƒGƒ‰[:<br>" + e.message + "</div>";
+        document.getElementById("patient-list-container").innerHTML = "<div class='empty-msg error'>éš±ï½­ç¸ºï½¿éœï½¼ç¸ºï½¿ç¹§ï½¨ç¹ï½©ç¹ï½¼:<br>" + e.message + "</div>";
         setStatus("");
     }
 }
@@ -374,9 +374,9 @@ function renderPatientList() {
         html += "</div>";
         count++;
     }
-    if (count === 0) html = "<div class='empty-msg'>ƒf[ƒ^‚È‚µ</div>";
+    if (count === 0) html = "<div class='empty-msg'>ç¹ãƒ»ãƒ»ç¹§ï½¿ç¸ºï½ªç¸ºãƒ»/div>";
     container.innerHTML = html;
-    setStatus(count + " Œ");
+    setStatus(count + " è‰ï½¶");
 }
 
 function calculateAge(birthDateStr) {
@@ -388,7 +388,7 @@ function calculateAge(birthDateStr) {
         var age = today.getFullYear() - birthDate.getFullYear();
         var m = today.getMonth() - birthDate.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-        return age + "Î";
+        return age + "è±ï½³";
     } catch(e) { return "-"; }
 }
 
@@ -410,37 +410,37 @@ function selectPatient(pid) {
         html += "<div style='font-size:18px; font-weight:bold; color:#fff;'>" + (p["Name"] || "No Name") + "</div>";
         html += "</div>";
         html += "<table class='detail-table'>";
-        html += "<tr><td><span class='detail-label'>Š³ÒID / ƒJƒ‹ƒe”Ô†</span><span class='detail-value'>" + (p["PatientID"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>–¼ (ƒJƒi)</span><span class='detail-value'>" + (p["Name"] || "-") + " (" + (p["NameKana"] || "-") + ")</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>«•Ê / ¶”NŒ“ú</span><span class='detail-value'>" + (p["Sex"] || "-") + " / " + (p["BirthDate"] || "-") + " (" + calculateAge(p["BirthDate"]) + ")</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>ZŠ</span><span class='detail-value'>§" + (p["PostalCode"] || "-") + "<br>" + (p["Address"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>“d˜b”Ô†</span><span class='detail-value'>" + (p["Phone"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>MRI‘Î‰</span><span class='detail-value'>" + (p["MRICompatible"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>RMS“±“ü / ‘—M‹@</span><span class='detail-value'>" + (p["RMS_Enabled"] || "No") + " / " + (p["RMS_TransmitterType"] || "-") + "</span></td></tr>";
-        html += "<tr><td><span class='detail-label'>“o˜^“ú</span><span class='detail-value'>" + (p["RegistrationDate"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>è¬”ï½£é– ãƒ»D / ç¹§ï½«ç¹ï½«ç¹ãƒ»åˆ†èœ¿ï½·</span><span class='detail-value'>" + (p["PatientID"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>è±Œä¸éŒ (ç¹§ï½«ç¹ãƒ»</span><span class='detail-value'>" + (p["Name"] || "-") + " (" + (p["NameKana"] || "-") + ")</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>è«¤ï½§è›»ï½¥ / é€•æº·ï½¹ï½´è­›åŸŸå¾‹</span><span class='detail-value'>" + (p["Sex"] || "-") + " / " + (p["BirthDate"] || "-") + " (" + calculateAge(p["BirthDate"]) + ")</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>è´ä¹—åœ’</span><span class='detail-value'>ç¸²ãƒ» + (p["PostalCode"] || "-") + "<br>" + (p["Address"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>é«®ï½»éš§ï½±é€¡ï½ªèœ¿ï½·</span><span class='detail-value'>" + (p["Phone"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>MRIèŸ‡ï½¾è ¢ãƒ»/span><span class='detail-value'>" + (p["MRICompatible"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>RMSèŸ†ä¸»ãƒ» / é¨¾âˆ½ï½¿ï½¡è®–ãƒ»/span><span class='detail-value'>" + (p["RMS_Enabled"] || "No") + " / " + (p["RMS_TransmitterType"] || "-") + "</span></td></tr>";
+        html += "<tr><td><span class='detail-label'>é€‹ï½»éª­ï½²è­Œï½¥</span><span class='detail-value'>" + (p["RegistrationDate"] || "-") + "</span></td></tr>";
         html += "</table>";
         
         document.getElementById("patient-detail-container").innerHTML = html;
-        document.getElementById("current-patient-name").innerText = (p["Name"] || "") + " —l";
+        document.getElementById("current-patient-name").innerText = (p["Name"] || "") + " è®’ãƒ»;
         
         renderSubData(gDevices, "PatientID", pid, "device-body", 
             ["ImplantDate", "Manufacturer", "ModelNumber", "DeviceType", "SerialNumber", "ImplantSite", "ImplantHospital", "Status"],
-            ["A‚İ“ú", "ƒ[ƒJ[", "Œ^”Ô", "í—Ş", "Serial", "•”ˆÊ", "•a‰@", "ó‘Ô"],
+            ["è®€å´ï½¾ï½¼ç¸ºï½¿è­Œï½¥", "ç¹ï½¡ç¹ï½¼ç¹§ï½«ç¹ï½¼", "è™ç‹—åˆ†", "éï½®é¬˜ãƒ», "Serial", "é©›ï½¨è´ãƒ», "é€ãƒ»åŠ¼", "è¿¥ï½¶è«·ãƒ»],
             "ConfigID");
         closeDeviceDetailPage();
         renderSubData(gSettings, "PatientID", pid, "settings-body", 
             ["SettingDate", "Mode", "LowerRate", "UpperRate", "AV_Delay"],
-            ["İ’è“ú", "Mode", "LRL", "URL", "AVD"]);
+            ["éšªï½­è³å£½å¾‹", "Mode", "LRL", "URL", "AVD"]);
         renderSubData(gMeasurements, "PatientID", pid, "measurement-body", 
             ["MeasureDate", "Sensing_A", "Sensing_V", "Impedance_A", "Impedance_RV"],
-            ["‘ª’è“ú", "Sense A", "Sense V", "Imp A", "Imp RV"]);
+            ["è²‚ï½¬è³å£½å¾‹", "Sense A", "Sense V", "Imp A", "Imp RV"]);
         showTab('info');
     }
 }
 
 function renderSubData(sourceArray, keyField, keyVal, targetId, keys, labels, idField) {
     if(!labels) labels = keys;
-    var html = "<div class='empty-msg'>—š—ğ‚È‚µ</div>";
+    var html = "<div class='empty-msg'>è»ï½¥è±ï½´ç¸ºï½ªç¸ºãƒ»/div>";
     var rows = [];
     for(var i=0; i<sourceArray.length; i++) {
         if(sourceArray[i][keyField] == keyVal) rows.push(sourceArray[i]);
@@ -457,7 +457,7 @@ function renderSubData(sourceArray, keyField, keyVal, targetId, keys, labels, id
             for(var h=0; h<keys.length; h++) {
                 var val = rows[i][keys[h]];
                 var k = keys[h];
-                if(k=="Status" || k=="ƒXƒe[ƒ^ƒX") {
+                if(k=="Status" || k=="ç¹§ï½¹ç¹ãƒ»ãƒ»ç¹§ï½¿ç¹§ï½¹") {
                     if(val=="Active") val = "<span class='status-active'>Active</span>";
                     else val = "<span class='status-old'>Old</span>";
                 }
@@ -500,7 +500,7 @@ function releaseLock() {
 }
 
 function savePatient() {
-    if (!acquireLock()) { alert("‘¼‚Ìƒ†[ƒU[‚ª•ÒW’†‚Å‚·B"); return; }
+    if (!acquireLock()) { alert("è‰æ‚¶ãƒ»ç¹ï½¦ç¹ï½¼ç¹§ï½¶ç¹ï½¼ç¸ºæªï½·ï½¨é«®ãƒ»ï½¸ï½­ç¸ºï½§ç¸ºå¶Â€ãƒ»); return; }
     var excel = null; var book = null;
     try {
         var pid = document.getElementById('np_pid').value;
@@ -535,37 +535,36 @@ function savePatient() {
         book.Save();
         book.Close();
         excel.Quit();
-        releaseLock();
-        alert("•Û‘¶‚ªŠ®—¹‚µ‚Ü‚µ‚½B");
-        loadAllData();
-        if(gCurrentPID) selectPatient(gCurrentPID);
         closeModal();
+        releaseLock();
+        alert("é€‹ï½»éª­ï½²è³å¾¡ï½ºãƒ»);
+        loadAllData();
     } catch(e) {
         if(book) book.Close(false); if(excel) excel.Quit();
-        releaseLock(); alert("ƒGƒ‰[: " + e.message);
+        releaseLock(); alert("ç¹§ï½¨ç¹ï½©ç¹ï½¼: " + e.message);
     }
 }
 
 function showNewPatientModal() {
     var modal = document.getElementById("modal-overlay");
     var content = document.getElementById("modal-content");
-    var html = "<div class='modal-title'>V‹KŠ³Ò“o˜^</div>";
+    var html = "<div class='modal-title'>è­ï½°éš•ä¹—ã…é– ãƒ»åŒ³éª­ï½²</div>";
     html += "<div style='height:400px; overflow-y:auto; padding-right:10px;'>";
-    html += "<div class='form-group'><label class='form-label'>Š³ÒID / ƒJƒ‹ƒe”Ô†</label><input class='form-input' id='np_pid'></div>";
-    html += "<div class='form-group'><label class='form-label'>–¼</label><input class='form-input' id='np_name'></div>";
-    html += "<div class='form-group'><label class='form-label'>–¼iƒJƒij</label><input class='form-input' id='np_kana'></div>";
-    html += "<div class='form-group'><label class='form-label'>¶”NŒ“ú</label><input class='form-input' type='date' id='np_birth'></div>";
-    html += "<div class='form-group'><label class='form-label'>«•Ê</label><select class='form-input' id='np_sex'><option>’j</option><option>—</option></select></div>";
+    html += "<div class='form-group'><label class='form-label'>è¬”ï½£é– ãƒ»D / ç¹§ï½«ç¹ï½«ç¹ãƒ»åˆ†èœ¿ï½·</label><input class='form-input' id='np_pid'></div>";
+    html += "<div class='form-group'><label class='form-label'>è±Œä¸éŒ</label><input class='form-input' id='np_name'></div>";
+    html += "<div class='form-group'><label class='form-label'>è±Œä¸éŒãƒ»åŒ»ãç¹å¥‡ï½¼ãƒ»/label><input class='form-input' id='np_kana'></div>";
+    html += "<div class='form-group'><label class='form-label'>é€•æº·ï½¹ï½´è­›åŸŸå¾‹</label><input class='form-input' type='date' id='np_birth'></div>";
+    html += "<div class='form-group'><label class='form-label'>è«¤ï½§è›»ï½¥</label><select class='form-input' id='np_sex'><option>é€•ï½·</option><option>è‚ï½³</option></select></div>";
     html += "<hr style='margin:15px 0; border:0; border-top:1px solid #eee;'>";
-    html += "<div class='form-group'><label class='form-label'>—X•Ö”Ô†</label><input class='form-input' id='np_zip'></div>";
-    html += "<div class='form-group'><label class='form-label'>ZŠ</label><input class='form-input' id='np_addr'></div>";
-    html += "<div class='form-group'><label class='form-label'>“d˜b”Ô†</label><input class='form-input' id='np_tel'></div>";
+    html += "<div class='form-group'><label class='form-label'>é©›ï½µè“ï½¿é€¡ï½ªèœ¿ï½·</label><input class='form-input' id='np_zip'></div>";
+    html += "<div class='form-group'><label class='form-label'>è´ä¹—åœ’</label><input class='form-input' id='np_addr'></div>";
+    html += "<div class='form-group'><label class='form-label'>é«®ï½»éš§ï½±é€¡ï½ªèœ¿ï½·</label><input class='form-input' id='np_tel'></div>";
     html += "<hr style='margin:15px 0; border:0; border-top:1px solid #eee;'>";
-    html += "<div class='form-group'><label class='form-label'>MRI‘Î‰</label><select class='form-input' id='np_mri'><option>Yes</option><option>No</option></select></div>";
-    html += "<div class='form-group'><label class='form-label'>RMS“±“ü</label><select class='form-input' id='np_rms_en'><option>Yes</option><option>No</option></select></div>";
-    html += "<div class='form-group'><label class='form-label'>‰“Šu‘—M‹@‚Ìí—Ş</label><input class='form-input' id='np_rms_type'></div>";
+    html += "<div class='form-group'><label class='form-label'>MRIèŸ‡ï½¾è ¢ãƒ»/label><select class='form-input' id='np_mri'><option>Yes</option><option>No</option></select></div>";
+    html += "<div class='form-group'><label class='form-label'>RMSèŸ†ä¸»ãƒ»</label><select class='form-input' id='np_rms_en'><option>Yes</option><option>No</option></select></div>";
+    html += "<div class='form-group'><label class='form-label'>é©•ï£°é««ç§˜Â€âˆ½ï½¿ï½¡è®–æº˜ãƒ»éï½®é¬˜ãƒ»/label><input class='form-input' id='np_rms_type'></div>";
     html += "</div>";
-    html += "<div style='text-align:right; margin-top:20px;'><button class='btn btn-secondary' onclick='closeModal()'>ƒLƒƒƒ“ƒZƒ‹</button> <button class='btn btn-primary' onclick='savePatient()'>•Û‘¶</button></div>";
+    html += "<div style='text-align:right; margin-top:20px;'><button class='btn btn-secondary' onclick='closeModal()'>ç¹§ï½­ç¹ï½£ç¹ï½³ç¹§ï½»ç¹ï½«</button> <button class='btn btn-primary' onclick='savePatient()'>è«æ™ï½­ãƒ»/button></div>";
     content.innerHTML = html;
     modal.style.display = "flex";
 }
@@ -576,7 +575,7 @@ function showDeviceModal() {
 var gCurrentConfigID = null;
 
 function showDeviceDetailPage(configID) {
-    if (!gCurrentPID) { alert("Š³Ò‚ğ‘I‘ğ‚µ‚Ä‚­‚¾‚³‚¢B"); return; }
+    if (!gCurrentPID) { alert("è¬”ï½£é– ãƒ»ï½’é©•ï½¸è¬šæ§­ï¼ ç¸ºï½¦ç¸ºä¸Šâ–¡ç¸ºè¼”ï¼ç¸²ãƒ»); return; }
     gCurrentConfigID = configID;
     
     var d = null;
@@ -592,10 +591,10 @@ function showDeviceDetailPage(configID) {
     
     var html = "<div class='detail-header'>";
     html += "<div style='display:flex; align-items:center; gap:15px;'>";
-    html += "<button class='btn btn-secondary' onclick='closeDeviceDetailPage()'>© –ß‚é</button>";
-    html += "<h2 style='color:#0f172a;'>" + (configID ? "ƒfƒoƒCƒXÚ×E•ÒW" : "V‹KƒfƒoƒCƒX“o˜^") + "</h2>";
+    html += "<button class='btn btn-secondary' onclick='closeDeviceDetailPage()'>ç«Šãƒ»è¬Œï½»ç¹§ãƒ»/button>";
+    html += "<h2 style='color:#0f172a;'>" + (configID ? "ç¹ãƒ»ãƒ°ç¹§ï½¤ç¹§ï½¹éš§ï½³é‚ï½°ç¹ï½»é‚±ï½¨é«®ãƒ» : "è­ï½°éš•ä¸Šãƒ§ç¹èˆŒã†ç¹§ï½¹é€‹ï½»éª­ï½²") + "</h2>";
     html += "</div>";
-    html += "<button class='btn btn-primary' style='padding:10px 25px; font-size:15px;' onclick='saveDevice()'>•Û‘¶‚·‚é</button>";
+    html += "<button class='btn btn-primary' style='padding:10px 25px; font-size:15px;' onclick='saveDevice()'>è«æ™ï½­å€¥â˜†ç¹§ãƒ»/button>";
     html += "</div>";
 
      html += "<div class='detail-columns'>";
@@ -622,73 +621,75 @@ function showDeviceDetailPage(configID) {
     // Column 1: Surgery
     html += "<div class='detail-column'>";
     html += "<div class='detail-section-card' style='height:100%; display:flex; flex-direction:column;'>";
-    html += "<div class='detail-section-header surgery'>”èpŠî–{î•ñ</div>";
+    html += "<div class='detail-section-header surgery'>ãƒ»ãƒ»ç„”é™¦ç˜æ¸•è­›ï½¬è« ãƒ»ï£°ï½±</div>";
     html += "<div class='detail-section-body' style='flex:1;'>";
-    html += field("dv_implant_date", "A‚İ“ú", d ? d.ImplantDate : "", "date");
-    html += field("dv_implant_hosp", "A‚İ•a‰@", d ? d.ImplantHospital : "");
-    html += field("dv_phys_p1", "å¡ˆã1", d ? d.PhysicianPrimary1 : "");
-    html += field("dv_phys_p2", "å¡ˆã2", d ? d.PhysicianPrimary2 : "");
-    html += field("dv_phys_p3", "å¡ˆã3", d ? d.PhysicianPrimary3 : "");
-    html += field("dv_phys_o1", "èpˆã1", d ? d.PhysicianOperator1 : "");
-    html += field("dv_phys_o2", "èpˆã2", d ? d.PhysicianOperator2 : "");
-    html += field("dv_phys_o3", "èpˆã3", d ? d.PhysicianOperator3 : "");
-    html += "<div class='full-width' style='flex:1;'>" + field("dv_summary", "èpƒTƒ}ƒŠ[", d ? d.SurgerySummary : "", "textarea") + "</div>";
+    html += field("dv_implant_date", "è®€å´ï½¾ï½¼ç¸ºï½¿è­Œï½¥", d ? d.ImplantDate : "", "date");
+    html += field("dv_implant_hosp", "è®€å´ï½¾ï½¼ç¸ºï½¿é€ãƒ»åŠ¼", d ? d.ImplantHospital : "");
+    html += field("dv_phys_p1", "è³ï½»è±ï½»è›¹ï½»1", d ? d.PhysicianPrimary1 : "");
+    html += field("dv_phys_p2", "è³ï½»è±ï½»è›¹ï½»2", d ? d.PhysicianPrimary2 : "");
+    html += field("dv_phys_p3", "è³ï½»è±ï½»è›¹ï½»3", d ? d.PhysicianPrimary3 : "");
+    html += field("dv_phys_o1", "è¬‡ç–ï½¡ç˜ç¾1", d ? d.PhysicianOperator1 : "");
+    html += field("dv_phys_o2", "è¬‡ç–ï½¡ç˜ç¾2", d ? d.PhysicianOperator2 : "");
+    html += field("dv_phys_o3", "è¬‡ç–ï½¡ç˜ç¾3", d ? d.PhysicianOperator3 : "");
+    html += "<div class='full-width' style='flex:1;'>" + field("dv_summary", "è¬‡ç–ï½¡è–™ã—ç¹æ§­Îœç¹ï½¼", d ? d.SurgerySummary : "", "textarea") + "</div>";
     html += "</div></div>";
     html += "</div>"; // end column 1
 
     // Column 2: Device & RV Lead
     html += "<div class='detail-column'>";
     html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header device'>”–{‘Ìî•ñ</div>";
+    html += "<div class='detail-section-header device'>ãƒ»ãƒ»æ‚½è´æºãƒ¥è£ï½±</div>";
     html += "<div class='detail-section-body'>";
-    html += field("dv_type", "í—Ş", d ? d.DeviceType : "", "select", ["PM (1ch)","PM (2ch)","ICD (1ch)","ICD (2ch)","CRTP","CRTD","S-ICD","Leadless PM"]);
-    html += field("dv_manuf", "ƒ[ƒJ[", d ? d.Manufacturer : "");
-    html += field("dv_model", "ƒ‚ƒfƒ‹No", d ? d.ModelNumber : "");
-    html += field("dv_serial", "ƒVƒŠƒAƒ‹No", d ? d.SerialNumber : "");
-    html += field("dv_site", "•”ˆÊ", d ? d.ImplantSite : "");
+    html += field("dv_type", "éï½®é¬˜ãƒ», d ? d.DeviceType : "", "select", ["PM (1ch)","PM (2ch)","ICD (1ch)","ICD (2ch)","CRTP","CRTD","S-ICD","Leadless PM"]);
+    html += field("dv_manuf", "ç¹ï½¡ç¹ï½¼ç¹§ï½«ç¹ï½¼", d ? d.Manufacturer : "");
+    html += field("dv_model", "ç¹ï½¢ç¹ãƒ»ÎNo", d ? d.ModelNumber : "");
+    html += field("dv_serial", "ç¹§ï½·ç¹ï½ªç¹§ï½¢ç¹ï½«No", d ? d.SerialNumber : "");
+    html += field("dv_site", "é©›ï½¨è´ãƒ», d ? d.ImplantSite : "");
     html += "<div></div>"; // Placeholder
-    html += "<div class='full-width'>" + field("dv_comment", "ƒRƒƒ“ƒg", d ? d.GeneratorComment : "") + "</div>";
+    html += "<div class='full-width'>" + field("dv_comment", "ç¹§ï½³ç¹ï½¡ç¹ï½³ç¹ãƒ», d ? d.GeneratorComment : "") + "</div>";
     html += "</div></div>";
 
     html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header lead-rv'>”RV leadî•ñ</div>";
+    html += "<div class='detail-section-header lead-rv'>ãƒ»ã‚³V leadè« ãƒ»ï£°ï½±</div>";
     html += "<div class='detail-section-body'>";
-    html += field("dv_rv_manuf", "ƒ[ƒJ[", d ? d.RVLeadManufacturer : "");
-    html += field("dv_rv_model", "ƒ‚ƒfƒ‹No", d ? d.RVLeadModel : "");
-    html += field("dv_rv_len", "’·‚³(cm)", d ? d.RVLeadLength : "");
-    html += field("dv_rv_site", "•”ˆÊ", d ? d.RVLeadSite : "");
-    html += field("dv_rv_serial", "ƒVƒŠƒAƒ‹No", d ? d.RVLeadSerial : "");
-    html += field("dv_rv_shock", "Œ`ó", d ? d.RVLeadShockType : "", "select", ["-", "DF1/S", "DF1/D", "DF4/S", "DF4/D"]);
-    html += "<div class='full-width'>" + field("dv_rv_comment", "ƒRƒƒ“ƒg", d ? d.RVLeadComment : "") + "</div>";
+    html += field("dv_rv_manuf", "ç¹ï½¡ç¹ï½¼ç¹§ï½«ç¹ï½¼", d ? d.RVLeadManufacturer : "");
+    html += field("dv_rv_model", "ç¹ï½¢ç¹ãƒ»ÎNo", d ? d.RVLeadModel : "");
+    html += field("dv_rv_len", "é«Ÿï½·ç¸ºãƒ»cm)", d ? d.RVLeadLength : "");
+    html += field("dv_rv_site", "é©›ï½¨è´ãƒ», d ? d.RVLeadSite : "");
+    html += field("dv_rv_serial", "ç¹§ï½·ç¹ï½ªç¹§ï½¢ç¹ï½«No", d ? d.RVLeadSerial : "");
+    html += field("dv_rv_shock", "è –ï½¢è¿¥ï½¶", d ? d.RVLeadShockType : "", "select", ["-", "DF1/S", "DF1/D", "DF4/S", "DF4/D"]);
+    html += "<div class='full-width'>" + field("dv_rv_comment", "ç¹§ï½³ç¹ï½¡ç¹ï½³ç¹ãƒ», d ? d.RVLeadComment : "") + "</div>";
     html += "</div></div>";
     html += "</div>"; // end column 2
 
     // Column 3: A Lead & LV Lead
     html += "<div class='detail-column'>";
     html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header lead-a'>”A leadî•ñ</div>";
+    html += "<div class='detail-section-header lead-a'>ãƒ»ã‚¢ leadè« ãƒ»ï£°ï½±</div>";
     html += "<div class='detail-section-body'>";
-    html += field("dv_a_manuf", "ƒ[ƒJ[", d ? d.ALeadManufacturer : "");
-    html += field("dv_a_model", "ƒ‚ƒfƒ‹No", d ? d.ALeadModel : "");
-    html += field("dv_a_len", "’·‚³(cm)", d ? d.ALeadLength : "");
-    html += field("dv_a_site", "•”ˆÊ", d ? d.ALeadSite : "");
-    html += field("dv_a_serial", "ƒVƒŠƒAƒ‹No", d ? d.ALeadSerial : "");
+    html += field("dv_a_manuf", "ç¹ï½¡ç¹ï½¼ç¹§ï½«ç¹ï½¼", d ? d.ALeadManufacturer : "");
+    html += field("dv_a_model", "ç¹ï½¢ç¹ãƒ»ÎNo", d ? d.ALeadModel : "");
+    html += field("dv_a_len", "é«Ÿï½·ç¸ºãƒ»cm)", d ? d.ALeadLength : "");
+    html += field("dv_a_site", "é©›ï½¨è´ãƒ», d ? d.ALeadSite : "");
+    html += field("dv_a_serial", "ç¹§ï½·ç¹ï½ªç¹§ï½¢ç¹ï½«No", d ? d.ALeadSerial : "");
     html += "<div></div>"; // Placeholder
-    html += "<div class='full-width'>" + field("dv_a_comment", "ƒRƒƒ“ƒg", d ? d.ALeadComment : "") + "</div>";
+    html += "<div class='full-width'>" + field("dv_a_comment", "ç¹§ï½³ç¹ï½¡ç¹ï½³ç¹ãƒ», d ? d.ALeadComment : "") + "</div>";
     html += "</div></div>";
 
     html += "<div class='detail-section-card'>";
-    html += "<div class='detail-section-header lead-lv'>”LV leadî•ñ</div>";
+    html += "<div class='detail-section-header lead-lv'>ãƒ»ã‚­V leadè« ãƒ»ï£°ï½±</div>";
     html += "<div class='detail-section-body'>";
-    html += field("dv_lv_manuf", "ƒ[ƒJ[", d ? d.LVLeadManufacturer : "");
-    html += field("dv_lv_model", "ƒ‚ƒfƒ‹No", d ? d.LVLeadModel : "");
-    html += field("dv_lv_len", "’·‚³(cm)", d ? d.LVLeadLength : "");
-    html += field("dv_lv_site", "•”ˆÊ", d ? d.LVLeadSite : "");
-    html += field("dv_lv_serial", "ƒVƒŠƒAƒ‹No", d ? d.LVLeadSerial : "");
-    html += field("dv_lv_port", "Œ`ó", d ? d.LVLeadPortType : "", "select", ["-", "IS-1", "IS-4"]);
-    html += "<div class='full-width'>" + field("dv_lv_comment", "ƒRƒƒ“ƒg", d ? d.LVLeadComment : "") + "</div>";
+    html += field("dv_lv_manuf", "ç¹ï½¡ç¹ï½¼ç¹§ï½«ç¹ï½¼", d ? d.LVLeadManufacturer : "");
+    html += field("dv_lv_model", "ç¹ï½¢ç¹ãƒ»ÎNo", d ? d.LVLeadModel : "");
+    html += field("dv_lv_len", "é«Ÿï½·ç¸ºãƒ»cm)", d ? d.LVLeadLength : "");
+    html += field("dv_lv_site", "é©›ï½¨è´ãƒ», d ? d.LVLeadSite : "");
+    html += field("dv_lv_serial", "ç¹§ï½·ç¹ï½ªç¹§ï½¢ç¹ï½«No", d ? d.LVLeadSerial : "");
+    html += field("dv_lv_port", "è –ï½¢è¿¥ï½¶", d ? d.LVLeadPortType : "", "select", ["-", "IS-1", "IS-4"]);
+    html += "<div class='full-width'>" + field("dv_lv_comment", "ç¹§ï½³ç¹ï½¡ç¹ï½³ç¹ãƒ», d ? d.LVLeadComment : "") + "</div>";
     html += "</div></div>";
     html += "</div>"; // end column 3
+
+    html += "</div>"; // end columns
 
     html += "</div>"; // end columns
     detailView.innerHTML = html;
@@ -702,12 +703,9 @@ function closeDeviceDetailPage() {
 
 function saveDevice() {
     if (!gCurrentPID) return;
-    if (!acquireLock()) { alert("‘¼‚Ìƒ†[ƒU[‚ª•ÒW’†‚Å‚·B"); return; }
+    if (!acquireLock()) { alert("è‰æ‚¶ãƒ»ç¹ï½¦ç¹ï½¼ç¹§ï½¶ç¹ï½¼ç¸ºæªï½·ï½¨é«®ãƒ»ï½¸ï½­ç¸ºï½§ç¸ºå¶Â€ãƒ»); return; }
     var excel = null; var book = null;
     try {
-        var loading = document.getElementById("loading-indicator");
-        if(loading) loading.style.display = "inline";
-
         excel = new ActiveXObject("Excel.Application");
         book = excel.Workbooks.Open(gDbPath);
         var sheet = book.Sheets("T_DeviceConfig");
@@ -738,71 +736,58 @@ function saveDevice() {
         }
 
         for(var i=0; i<fields.length; i++) {
-            var el = document.getElementById(fields[i]);
-            if(el) {
-                sheet.Cells(targetRow, i + 3).Value = el.value;
-            }
+            var val = document.getElementById(fields[i]).value;
+            sheet.Cells(targetRow, i + 3).Value = val;
         }
 
         book.Save();
         book.Close();
         excel.Quit();
         releaseLock();
-        
+        alert("è«æ™ï½­ä¼œï½®å¾¡ï½ºãƒ»ï¼ ç¸ºï½¾ç¸ºåŠ±â—†ç¸²ãƒ»);
         loadAllData();
-        if(gCurrentPID) selectPatient(gCurrentPID);
-        closeDeviceDetailPage();
-        
-        if(loading) loading.style.display = "none";
-        alert("•Û‘¶Š®—¹‚µ‚Ü‚µ‚½B");
-        
     } catch(e) {
         if(book) book.Close(false); if(excel) excel.Quit();
-        releaseLock(); 
-        var loading = document.getElementById("loading-indicator");
-        if(loading) loading.style.display = "none";
-        alert("•Û‘¶ƒGƒ‰[: " + e.message);
+        releaseLock(); alert("è«æ™ï½­å€¥ãŠç¹ï½©ç¹ï½¼: " + e.message);
     }
 }
 function closeModal() { document.getElementById("modal-overlay").style.display = "none"; document.getElementById("modal-content").className = "modal-box"; }
-function showSettingsModal() { alert("–¢À‘•"); }
-function showMeasurementModal() { alert("–¢À‘•"); }
+function showSettingsModal() { alert("è­›ï½ªè³æº¯ï½£ãƒ»); }
+function showMeasurementModal() { alert("è­›ï½ªè³æº¯ï½£ãƒ»); }
 
 </script>
 </head>
 <body>
 <div id="sidebar-panel">
     <div class="sidebar-header">
-        <button id="btn-list" class="sidebar-tab active" onclick="showTab('list')">ƒŠƒXƒg</button>
-        <button id="btn-info" class="sidebar-tab" onclick="showTab('info')">Šî–{î•ñ</button>
+        <button id="btn-list" class="sidebar-tab active" onclick="showTab('list')">ç¹ï½ªç¹§ï½¹ç¹ãƒ»/button>
+        <button id="btn-info" class="sidebar-tab" onclick="showTab('info')">è“ï½ºè­›ï½¬è« ãƒ»ï£°ï½±</button>
     </div>
     <div id="tab-list" class="sidebar-content active">
-        <input type="text" class="search-box" id="search-box" onkeyup="filterList()" placeholder="ŒŸõ...">
+        <input type="text" class="search-box" id="search-box" onkeyup="filterList()" placeholder="è®€æ‡ƒï½´ï½¢...">
         <div id="status-msg" style="color:#fcd34d; font-size:12px; margin-bottom:5px;">Loading...</div>
         <div id="patient-list-container"></div>
         <div style="margin-top:20px; padding-top:20px; border-top:1px solid #334155;">
-            <button class="btn btn-primary btn-block" onclick="showNewPatientModal()">{ V‹KŠ³Ò“o˜^</button>
+            <button class="btn btn-primary btn-block" onclick="showNewPatientModal()">ãƒ»ãƒ»è­ï½°éš•ä¹—ã…é– ãƒ»åŒ³éª­ï½²</button>
         </div>
     </div>
     <div id="tab-info" class="sidebar-content"><div id="patient-detail-container"></div></div>
 </div>
 <div id="main-panel">
     <div class="main-header">
-        <div class="app-title"> CIEDs Š³ÒŠÇ—ƒVƒXƒeƒ€ <span id="loading-indicator" class="loader">’ÊM’†...</span></div>
+        <div class="app-title"> CIEDs è¬”ï½£é– ãƒ»ï½®ï½¡é€…ãƒ»ã™ç¹§ï½¹ç¹ãƒ»Î’ <span id="loading-indicator" class="loader">é¨¾å£»ï½¿ï½¡è³ï½­...</span></div>
         <div id="current-patient-name" class="current-patient-name"></div>
     </div>
     <div id="brief-view" class="cards-area">
-        <div class="card"><div class="card-header blue"><div class="card-title">ƒfƒoƒCƒXî•ñ</div><button class="btn btn-secondary" onclick="showDeviceModal()">’Ç‰Á</button></div><div class="card-body" id="device-body"></div></div>
-        <div class="card"><div class="card-header green"><div class="card-title">İ’èî•ñ</div><button class="btn btn-secondary" onclick="showSettingsModal()">’Ç‰Á</button></div><div class="card-body" id="settings-body"></div></div>
-        <div class="card"><div class="card-header yellow"><div class="card-title">‘ª’èî•ñ</div><button class="btn btn-secondary" onclick="showMeasurementModal()">’Ç‰Á</button></div><div class="card-body" id="measurement-body"></div></div>
+        <div class="card"><div class="card-header blue"><div class="card-title">ç¹ãƒ»ãƒ°ç¹§ï½¤ç¹§ï½¹è« ãƒ»ï£°ï½±</div><button class="btn btn-secondary" onclick="showDeviceModal()">éœ‘ï½½èœ‰ï£°</button></div><div class="card-body" id="device-body"></div></div>
+        <div class="card"><div class="card-header green"><div class="card-title">éšªï½­è³å£½ãƒ¥è£ï½±</div><button class="btn btn-secondary" onclick="showSettingsModal()">éœ‘ï½½èœ‰ï£°</button></div><div class="card-body" id="settings-body"></div></div>
+        <div class="card"><div class="card-header yellow"><div class="card-title">è²‚ï½¬è³å£½ãƒ¥è£ï½±</div><button class="btn btn-secondary" onclick="showMeasurementModal()">éœ‘ï½½èœ‰ï£°</button></div><div class="card-body" id="measurement-body"></div></div>
     </div>
     <div id="detail-view"></div>
 </div>
 <div id="modal-overlay" class="modal-overlay"><div id="modal-content" class="modal-box"></div></div>
 </body>
 </html>
-
-
 
 
 

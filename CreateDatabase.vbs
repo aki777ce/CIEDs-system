@@ -33,10 +33,18 @@ arrSheets = Array("T_Patients", "T_DeviceConfig", "T_Settings", "T_Measurements"
 
 Dim headersPatients, headersDeviceConfig, headersSettings, headersMeasurements, headersDocuments
 headersPatients = Array("PatientID", "Name", "NameKana", "Sex", "BirthDate", "PostalCode", "Address", "Phone", "MRICompatible", "RMS_Enabled", "RMS_TransmitterType", "RegistrationDate")
-headersDeviceConfig = Array("ConfigID", "PatientID", "手術日", "本体メーカー", "本体型番", "本体Serial", "リード構成", "ステータス")
-headersSettings = Array("SettingID", "PatientID", "設定日", "Mode", "LowerRate", "UpperRate", "Output_A", "Output_V", "Sensitivity_A", "Sensitivity_V", "AV_Delay", "ZoneSettings", "Details")
-headersMeasurements = Array("MeasureID", "PatientID", "計測日", "区分", "Battery", "Impedance_A", "Impedance_RV", "Impedance_LV", "Threshold_A", "Threshold_RV", "Threshold_LV", "Sensing_A", "Sensing_V", "Burden_ATAF", "Burden_VT")
-headersDocuments = Array("DocID", "PatientID", "登録日", "カテゴリ", "FilePath")
+headersDeviceConfig = Array("ConfigID", "PatientID", "ImplantDate", "ImplantHospital", _
+    "PhysicianPrimary1", "PhysicianPrimary2", "PhysicianPrimary3", _
+    "PhysicianOperator1", "PhysicianOperator2", "PhysicianOperator3", _
+    "SurgerySummary", _
+    "DeviceType", "Manufacturer", "ModelNumber", "SerialNumber", "ImplantSite", "GeneratorComment", _
+    "ALeadManufacturer", "ALeadModel", "ALeadLength", "ALeadSite", "ALeadSerial", "ALeadComment", _
+    "RVLeadManufacturer", "RVLeadModel", "RVLeadLength", "RVLeadSite", "RVLeadSerial", "RVLeadShockType", "RVLeadComment", _
+    "LVLeadManufacturer", "LVLeadModel", "LVLeadLength", "LVLeadSite", "LVLeadSerial", "LVLeadPortType", "LVLeadComment", _
+    "Status")
+headersSettings = Array("SettingID", "PatientID", "SettingDate", "Mode", "LowerRate", "UpperRate", "Output_A", "Output_V", "Sensitivity_A", "Sensitivity_V", "AV_Delay", "ZoneSettings", "Details")
+headersMeasurements = Array("MeasureID", "PatientID", "MeasureDate", "Category", "Battery", "Impedance_A", "Impedance_RV", "Impedance_LV", "Threshold_A", "Threshold_RV", "Threshold_LV", "Sensing_A", "Sensing_V", "Burden_ATAF", "Burden_VT")
+headersDocuments = Array("DocID", "PatientID", "RegistrationDate", "Category", "FilePath")
 
 Do While objWorkbook.Sheets.Count < UBound(arrSheets) + 1
     objWorkbook.Sheets.Add , objWorkbook.Sheets(objWorkbook.Sheets.Count)
@@ -92,11 +100,14 @@ Set objSheet = objWorkbook.Sheets("T_DeviceConfig")
 objSheet.Cells(2, 1).Value = "C0001"
 objSheet.Cells(2, 2).Value = "P0001"
 objSheet.Cells(2, 3).Value = "2020/05/15"
-objSheet.Cells(2, 4).Value = "Medtronic"
-objSheet.Cells(2, 5).Value = "Azure XT DR MRI"
-objSheet.Cells(2, 6).Value = "ABC123456"
-objSheet.Cells(2, 7).Value = "RA-RV"
-objSheet.Cells(2, 8).Value = "Active"
+objSheet.Cells(2, 4).Value = "○○総合病院"
+objSheet.Cells(2, 5).Value = "山田 主治医"
+objSheet.Cells(2, 8).Value = "鈴木 手術医"
+objSheet.Cells(2, 12).Value = "PM"
+objSheet.Cells(2, 13).Value = "Medtronic"
+objSheet.Cells(2, 14).Value = "Azure XT DR MRI"
+objSheet.Cells(2, 15).Value = "ABC123456"
+objSheet.Cells(2, 38).Value = "Active"
 
 Set objSheet = objWorkbook.Sheets("T_Settings")
 objSheet.Cells(2, 1).Value = "S0001"
@@ -121,3 +132,4 @@ objWorkbook.Close False
 objExcel.Quit
 
 WScript.Echo "SUCCESS"
+
